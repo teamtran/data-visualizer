@@ -22,13 +22,12 @@
 2. Go to Settings > Developer Settings (at bottom) > Personal access tokens > Tokens (classic).  Name the token, check all the boxes, and press the generate token button. Copy the generated token to somewhere where you won't lose it.
 
 ## Download the GitHub repository
-1. In the terminal, go to the directory you want to store your repository. For example, `C:\Users\Azalea\University of Toronto\Helen Tran - 2020 Azalea Uva\Coding`
-2. Create a new folder in the directory above called `spectrometry-visualizer`.
-3. Type `cd spectrometry-visualizer` in the terminal.
-4. Type `git clone git@github.com:teamtran/spectrometry-visualizer.git` in the terminal.
-5. When prompted to input your github information.
+1. In the terminal (or called command prompt), go to the directory you want to store your repository. For example, `C:\Users\Azalea\University of Toronto\Helen Tran - 2020 Azalea Uva\Coding`
+2. Type `cd spectrometry-visualizer` in the terminal.
+3. Type `git clone git@github.com:teamtran/spectrometry-visualizer.git` in the terminal.
+4. When prompted to input your github information.
     - Username: type in your github username
     - Password: copy and paste your personal access token that was generated in the previous instructions.
-6. If authorized and done correctly, the files should be downloaded to your directory.
+5. If authorized and done correctly, the files should be downloaded to your directory.
 
-You can now move on to the SOP.md fileSmcSl2%lS*Cms
+You can now move on to the SOP.md file
