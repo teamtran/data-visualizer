@@ -1,0 +1,117 @@
+{
+    "subplots": {
+        "expt1": {
+            "experiment_code": "002-I",
+            "experiments": [
+                "002-I8_1",
+                "002-I8_7",
+                "002-I8_10",
+                "002-I8_13",
+                "002-I10_1"
+            ],
+            "instrument": "optics",
+            "measurements": ["uv_vis", "photoluminescence"]
+        },
+        "expt2": {
+            "experiment_code": "002-J",
+            "experiments": [
+                "002-J0",
+                "002-J1",
+                "002-J2",
+                "002-J4"
+            ],
+            "instrument": "optics",
+            "measurements": ["uv_vis", "photoluminescence"]
+        },
+        "expt3": {
+            "experiment_code": "002-E",
+            "experiments": [
+                "002-E10",
+                "002-E13",
+                "002-E14",
+                "002-E15"
+            ],
+            "instrument": "ANALEST",
+            "measurements": ["uv_vis", "photoluminescence"]
+        },
+        "expt4": {
+            "experiment_code": "002-G",
+            "experiments": [
+                "002-G3",
+                "002-G6",
+                "002-G7",
+                "002-G8"
+            ],
+            "instrument": "optics",
+            "measurements": ["uv_vis", "photoluminescence"]
+        },
+        "expt5": {
+            "experiment_code": "002-K",
+            "experiments": [
+                "002-K0_acn_ref_1",
+                "002-K0_acn_ref_2",
+                "002-K0_acn_ref_3",
+                "002-K1_acn_ref_1",
+                "002-K1_acn_ref_2",
+                "002-K1_acn_ref_3"
+            ],
+            "instrument": "optics",
+            "measurements": ["photoluminescence"]
+        },
+        "expt6": {
+            "experiment_code": "002-F",
+            "experiments": [
+                "002-F10_cal",
+                "002-F1_cal",
+                "002-F2_cal",
+                "002-F3_cal",
+                "002-F11_cal"
+            ],
+            "instrument": "ANALEST",
+            "measurements": ["uv_vis", "photoluminescence"]
+        },
+        "expt7": {
+            "experiment_code": "002-L",
+            "experiments": [
+                "002-L0_1",
+                "002-L1_1",
+                "002-L2_1",
+                "002-L4_1",
+                "002-L6_1"
+            ],
+            "instrument": "ANALEST",
+            "measurements": ["photoluminescence"]
+        }
+    },
+    "calibration": {
+        "expt1": {
+            "experiment_code": "002-F",
+            "experiments": [
+                "002-F10_cal",
+                "002-F1_cal",
+                "002-F2_cal",
+                "002-F3_cal",
+                "002-F11_cal"
+            ],
+            "instrument": "ANALEST",
+            "measurements": ["photoluminescence"],
+            "lambda_max": 450
+        },
+        "expt2": {
+            "experiment_code": "002-G",
+            "experiments": [
+                "002-G1_2",
+                "002-G2",
+                "002-G3",
+                "002-G4",
+                "002-G5"
+            ],
+            "instrument": "optics",
+            "measurements": ["photoluminescence"],
+            "lambda_max": 450
+        }
+    },
+    "stacked": {
+        "expt1": []
+    }
+}
