@@ -15,9 +15,3 @@
 2. Type in "y" and enter.
 3. Next, write this command: `conda activate spectrometry-visualizer`
 4. Sanity Check: make sure `(spectrometry-visualizer)` is at the beginning of the line in your terminal.
-
-## Change the path of the directory with all of your data.
-### It's incredibly important to be organized and keep your data with an organized folder structure
-1. Go to `data` > `data_utils.py`.
-2. Change the variable `data_path` to the correct directory where your data is located. Refer to the existing code as a reference to your path.
-3. 
