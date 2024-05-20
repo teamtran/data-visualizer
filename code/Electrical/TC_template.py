@@ -5,7 +5,6 @@ import matplotlib
 import numpy as np
 import scipy.stats as stats
 import pandas as pd
-import seaborn as sns
 import json
 from pathlib import Path
 from matplotlib.ticker import MultipleLocator, AutoMinorLocator
