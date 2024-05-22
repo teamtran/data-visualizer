@@ -33,8 +33,7 @@ transfer_curve_data_filenames: dict = {
 }
 
 # Output curve filename
-overlay_data_dir: Path = root_path / "data" / "Electrical"
-overlay_result_dir: Path = root_path / "results" / "Electrical"
+
 output_curve_data_filenames: dict = {
     "2024_05_07_OC_AL_1_35L_1A_1.xls": ["OC_AL_1_35L_1A_1"]
 }
@@ -71,19 +70,21 @@ if __name__ == "__main__":
                 sheet_name,
                 result_path,
                 style_path,
-                1.15e-08,
-                0.1,
-                0.005,
+                c=1.15e-08,
+                w=0.1,
+                l=0.005,
                 up_color="blue",
                 down_color="yellow",
             )
             # Plot transfer curve
-            plot.plot_transfer_curve(max_x_range=-40, min_x_range=-60, direction="both")
+            plot.plot_transfer_curve(
+                xlim=(-80, 0), max_x_range=-40, min_x_range=-60, direction="both"
+            )
             # Plot saturation regime curves
-            plot.plot_up_saturation_regime()
-            plot.plot_down_saturation_regime()
+            plot.plot_up_saturation_regime(max_x_range=-40, min_x_range=-60)
+            plot.plot_down_saturation_regime(max_x_range=-40, min_x_range=-60)
             # Export metadata (must plot saturation regime curves first)
-            plot.export_metadata(-30, -70)
+            plot.export_metadata(on_GateV=-60, off_GateV=-40)
 
     # Output Curves
     for data_filename in output_curve_data_filenames.keys():

@@ -622,6 +622,11 @@ class TransferCurve:
             metadata_old = pd.read_csv(
                 self.result_dir / f"{self.root_name}/metadata_{self.root_name}.csv"
             )
+            # drop the row if the sheet name is already present
+            if metadata_old["Sheet Name"].isin([self.sheet_name]).any():
+                metadata_old = metadata_old.drop(
+                    metadata_old[metadata_old["Sheet Name"] == self.sheet_name].index
+                )
             metadata = pd.concat([metadata_old.iloc[:-2], metadata])
 
         # replace bottom line with new average and stdev
@@ -669,7 +674,7 @@ class TransferCurve:
             id_on_off_std,
             vthreshold_std,
         ]
-        # TODO: if the sheet has already been plotted, overwrite it but dont append.
+
         metadata.to_csv(
             self.result_dir / f"{self.root_name}/metadata_{self.root_name}.csv",
             mode="w",
