@@ -1,5 +1,37 @@
 {
-    "graph": {"default": {"font_size": 7, "font_family": "Helvetica", "line_thickness": 1} ,"maldi": {"font_size": 7, "font_family": "Helvetica", "line_thickness": 0.2}},
-    "legend": {"font_size": 6, "font_family": "Helvetica", "title_font_size": 18},
-    "color": {"yellow": "#f5c92a", "dark_yellow": "#ad8c09", "blue": "#8286ff", "dark_blue": "#3a53d6"}
+    "graph": {
+        "default": {
+            "font_size": 7,
+            "font_family": "Helvetica",
+            "line_thickness": 1
+        },
+        "maldi": {
+            "font_size": 7,
+            "font_family": "Helvetica",
+            "line_thickness": 0.2
+        }
+    },
+    "legend": {
+        "font_size": 6,
+        "font_family": "Helvetica",
+        "title_font_size": 18
+    },
+    "color": {
+        "green_blue_1": "#f7fcf0",
+        "green_blue_2": "#e0f3db",
+        "green_blue_3": "#ccebc5",
+        "green_blue_4": "#a8ddb5",
+        "green_blue_5": "#7bccc4",
+        "green_blue_6": "#4eb3d3",
+        "green_blue_7": "#2b8cbe",
+        "green_blue_8": "#0868ac",
+        "green_blue_9": "#084081",
+        "green_blue_10": "#081d58",
+        "yellow": "#f5c92a",
+        "dark_yellow": "#ad8c09",
+        "blue": "#8286ff",
+        "dark_blue": "#3a53d6",
+        "green": "#00ff00",
+        "red": "#ff0000"
+    }
 }
