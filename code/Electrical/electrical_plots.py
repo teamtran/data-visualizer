@@ -656,8 +656,8 @@ class TransferCurve:
         vthreshold_std: float = metadata["Threshold Voltage (V)"].std()
         metadata.loc["Average"] = [
             "Average",
-            u_down_across_replicates,
             u_up_across_replicates,
+            u_down_across_replicates,
             u_average_across_replicates,
             id_on_average_across_replicates,
             id_off_average_across_replicates,
