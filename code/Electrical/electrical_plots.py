@@ -82,8 +82,8 @@ class TransferCurve:
             slope_id_up (float): slope of the up saturation regime
             slope_id_down (float): slope of the down saturation regime
         """
-        u_down: float = (2 * self.l * (np.abs(slope_id_down) ** 2)) / (self.c * self.w)
-        u_up: float = (2 * self.l * (np.abs(slope_id_up) ** 2)) / (self.c * self.w)
+        u_down: float = (2 * self.l * (slope_id_down**2)) / (self.c * self.w)
+        u_up: float = (2 * self.l * (slope_id_up**2)) / (self.c * self.w)
 
         u_average: float = np.mean([u_down, u_up])
         return u_down, u_up, u_average
@@ -373,17 +373,21 @@ class TransferCurve:
                 "Invalid direction. Please choose 'up', 'down', or 'both'."
             )
         ax.set_ylabel("$|\mathregular{I_{D}}|^{1/2}$ ($A^{1/2}$)")  # y-axis label
-        ax.set_xlabel("Gate Voltage, V$_G$ (V)")  # x-axis label
-        ax2.set_ylabel("-$\mathregular{I_{D}}$ (A)")  # y-axis label
+        ax.set_xlabel("V$_G$ (V)")  # x-axis label
+        ax2.set_ylabel("$|\mathregular{I_{D}}|$ (A)")  # y-axis label
 
         ax2.legend(loc="upper right", frameon=False)  # legend for id_up and id_down
 
         # y-axis and x-axis ticks
         ax.xaxis.set_minor_locator(AutoMinorLocator(2))
         ax.tick_params(
-            axis="both", which="minor", length=4, direction="in"
+            axis="both", which="minor", length=3, direction="in"
         )  # direction and length of minor ticks in X and Y-axis
-        ax.tick_params(axis="both", which="major", length=6, direction="in")
+        ax.tick_params(axis="both", which="major", length=4, direction="in")
+        ax2.tick_params(
+            axis="both", which="minor", direction="in"
+        )  # direction and length of minor ticks in X and Y-axis
+        ax2.tick_params(axis="both", which="major", length=4, direction="in")
         # Set scientific notation for ticks
         xfmt = ScalarFormatter()
         xfmt.set_powerlimits((-3, 3))
@@ -437,7 +441,7 @@ class TransferCurve:
             markersize=12,
         )  # plot sqrt_DrainI
         ax.set_ylabel("$|\mathregular{I_{D}}|^{1/2}$ ($A^{1/2}$)")  # y-axis label
-        ax.set_xlabel("Gate Voltage, V$_G$ (V)")  # x-axis label
+        ax.set_xlabel("V$_G$ (V)")  # x-axis label
 
         # calculate linear fit
         slope_id_up, intercept, r_value, p_value, std_err = stats.linregress(
@@ -519,7 +523,7 @@ class TransferCurve:
             markersize=12,
         )  # plot sqrt_DrainI
         ax.set_ylabel("$|\mathregular{I_{D}}|^{1/2}$ ($A^{1/2}$)")  # y-axis label
-        ax.set_xlabel("Gate Voltage, V$_G$ (V)")  # x-axis label
+        ax.set_xlabel("V$_G$ (V)")  # x-axis label
 
         # calculate the linear fit
         slope_id_down, intercept, r_value, p_value, std_err = stats.linregress(
@@ -789,8 +793,8 @@ class OutputCurve:
         # ax.legend(handles[::-1], labels[::-1], loc="best", frameon=False)
         ax.spines["right"].set_visible(False)
         ax.spines["top"].set_visible(False)
-        ax.set_ylabel("-Drain Current, -I$_D$ (A)")  # y-axis label
-        ax.set_xlabel("Drain Voltage, V$_D$ (V)")  # x-axis label
+        ax.set_ylabel("-I$_D$ (A)")  # y-axis label
+        ax.set_xlabel("V$_D$ (V)")  # x-axis label
         # y-axis and x-axis ticks
         ax.xaxis.set_minor_locator(AutoMinorLocator(2))
         ax.tick_params(
@@ -870,6 +874,7 @@ class OverlayTransferCurves:
             self.data_dicts
         ), "Number of colors in color_order must match the number of data files in data_paths."
         fig, ax = plt.subplots(figsize=(6, 4))
+        ax.set_yscale("log")
         color_idx = 0
         for data_path, sheet_name in self.data_dicts.items():
             data_path = Path(self.data_dir / data_path)
@@ -881,7 +886,7 @@ class OverlayTransferCurves:
                 plot_label = labels[color_idx]
             ax.plot(
                 data["GateV"][:up_down_idx],
-                -data["DrainI"][:up_down_idx],
+                np.abs(data["DrainI"][:up_down_idx]),
                 label=plot_label,
                 linewidth=1.5,
                 markersize=12,
@@ -891,15 +896,11 @@ class OverlayTransferCurves:
         ax.legend(loc="best", frameon=False)
         ax.spines["right"].set_visible(False)
         ax.spines["top"].set_visible(False)
-        ax.set_ylabel("Drain Current, I$_D$ (A)")
-        ax.set_xlabel("Gate Voltage, V$_G$ (V)")
+        ax.set_ylabel("|I$_D$| (A)")
+        ax.set_xlabel("V$_G$ (V)")
         ax.xaxis.set_minor_locator(AutoMinorLocator(2))
-        ax.tick_params(axis="both", which="minor", length=4, direction="in")
-        ax.tick_params(axis="both", which="major", length=6, direction="in")
-        xfmt = ScalarFormatter()
-        xfmt.set_powerlimits((-3, 3))
-        ax.yaxis.set_major_formatter(xfmt)
-        ax.yaxis.major.formatter._useMathText = True
+        ax.tick_params(axis="both", which="minor", length=3, direction="in")
+        ax.tick_params(axis="both", which="major", length=4, direction="in")
         plt.savefig(
             self.result_dir
             / f"overlay_transfer_curve_{self.overlay_transfer_curve_name}.svg",
