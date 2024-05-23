@@ -139,20 +139,21 @@ class TransferCurve:
         """
         x = self.data["GateV"][0 : self.up_down_idx]
         y = self.data["sqrt_DrainI"][0 : self.up_down_idx]
-        # normalize x and y
-        norm_x = (x - x.min()) / (x.max() - x.min())
-        norm_y = (y - y.min()) / (y.max() - y.min())
-        # calculate first derivative
-        first_derivative = np.gradient(norm_y[::sampling_rate], norm_x[::sampling_rate])
+        # calculate first normalized gradient
+        first_derivative = np.gradient(y[::sampling_rate], x[::sampling_rate])
+        first_norms = np.linalg.norm(first_derivative, axis=0)
+        first_derivative = [
+            np.where(first_norms == 0, 0, i / first_norms) for i in first_derivative
+        ]
         # calculate second derivative
-        second_derivative = np.gradient(first_derivative, norm_x[::sampling_rate])
-        # find the row indices at which the second derivative is 0 +/- threshold
-        linear_regime_idx = np.where(
-            (second_derivative < (threshold)) & (second_derivative > -(threshold))
-        )[0]
-        # get index at which the linear_regime_idx does not have consecutive values
-        # because non-consecutive value means a gap between linear segments of the curve
-        print(linear_regime_idx)
+        second_derivative = np.gradient(first_derivative, x[::sampling_rate])
+        second_norms = np.linalg.norm(second_derivative, axis=0)
+        second_derivative = np.array(
+            [
+                np.where(second_norms == 0, 0, i / second_norms)
+                for i in second_derivative
+            ]
+        )
         linear_regime_idx = np.split(
             linear_regime_idx, np.where(np.diff(linear_regime_idx) != 1)[0] + 1
         )[-1]

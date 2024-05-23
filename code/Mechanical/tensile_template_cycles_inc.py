@@ -6,7 +6,7 @@ import pdb
 from sklearn.metrics import r2_score
 
 
-def linear_regime(data: pd.DataFrame, threshold: float = 1, sampling_rate: int = 5):
+def linear_regime(data: pd.DataFrame, threshold: float = .9, sampling_rate: int = 5):
     # calculate first derivative of Stress vs. Strain every sampling_rate rows
     # pdb.set_trace()
     first_derivative = np.gradient(
@@ -45,12 +45,12 @@ def linear_regime(data: pd.DataFrame, threshold: float = 1, sampling_rate: int =
 
 
 if __name__ == "__main__":
-    # NOTE: prior to loading data, add user-defined columns (thickness, width, cross-sectional area, etc.)
+    # NOTE: prior to loading data, add user-defined columns (thickness, width, cross-sectional area, load cell etc.)
     # TODO: Change data_path to the path of the data file
     # 23-11-3PetG2,8.8kdiaminewdioxTest014Data
     # 2024_03_28 013.A.6 4k10percent 30minvac  Test003Data
     data_path: Path = Path(
-        "data/2024_03_28 013.A.6 4k10percent 30minvac  Test003Data.csv"
+        "Mechanical/data/2024_05_03_013_A_9_8k10p_rate cycle 0.01 to 5mm s-1 at 25p Test005Data.csv"
     )
 
     # Load data
@@ -73,7 +73,13 @@ if __name__ == "__main__":
     end_idx = data[stress_maximum_index:].index[
         data["Stress (MPa)"][stress_maximum_index:] < stress_error
     ][0]
-
+    #find row index at which cycles start
+    cycle1_start_index = data.index[data["SetName"] == "Tension1 petg rate cycle 0.01"][0]
+    cycle2_start_index = data.index[data["SetName"] == "Tension1 petg rate cycle 0.1"][0]
+    cycle3_start_index = data.index[data["SetName"] == "Tension1 petg rate cycle 0.2"][0]
+    cycle4_start_index = data.index[data["SetName"] == "Tension1 petg rate cycle 2"][0]
+    cycle5_start_index = data.index[data["SetName"] == "Tension1 petg rate cycle 5"][0]
+    
     # calculate linear regime
     linear_fit, r2, linear_regime_start, linear_regime_end = linear_regime(
         data.loc[start_idx + 1 : stress_maximum_index]
@@ -82,22 +88,42 @@ if __name__ == "__main__":
     # Plot data
     fig, ax = plt.subplots()
     ax.scatter(
-        data["Strain (%)"][start_idx : end_idx + 5],
-        data["Stress (MPa)"][start_idx : end_idx + 5],
-        label="Stress-Strain Curve",
+        data["Strain (%)"][cycle1_start_index : cycle2_start_index-1],
+        data["Stress (MPa)"][cycle1_start_index : cycle2_start_index-1],
+        label="0.01mm s-1", color="#1666ba"
+    )
+    ax.scatter(
+        data["Strain (%)"][cycle2_start_index : cycle3_start_index-1],
+        data["Stress (MPa)"][cycle2_start_index : cycle3_start_index-1],
+        label="0.1mm s-1", color="#368ce7"
+    )
+    ax.scatter(
+        data["Strain (%)"][cycle3_start_index : cycle4_start_index-1],
+        data["Stress (MPa)"][cycle3_start_index : cycle4_start_index-1],
+        label="0.2mm s-1", color="#7ab3ef"
+    )
+    ax.scatter(
+        data["Strain (%)"][cycle4_start_index : cycle5_start_index-1],
+        data["Stress (MPa)"][cycle4_start_index : cycle5_start_index-1],
+        label="2mm s-1", color="#bedaf7"
+    )
+    ax.scatter(
+        data["Strain (%)"][cycle5_start_index :],
+        data["Stress (MPa)"][cycle5_start_index :],
+        label="5mm s-1", color="#deecfb"
     )
     # plot linear fit and statistics
-    ax.plot(
-        data["Strain (%)"][linear_regime_start:linear_regime_end],
-        np.polyval(
-            linear_fit, data["Strain (%)"][linear_regime_start:linear_regime_end]
-        ),
-        label=f"Linear Fit: y = {linear_fit[0]:.4f}x + {linear_fit[1]:.4f} \n R^2 = {r2:.4f}",
-        color="red",
-    )
+    #ax.plot(
+        #data["Strain (%)"][linear_regime_start:linear_regime_end],
+        #np.polyval(
+           # linear_fit, data["Strain (%)"][linear_regime_start:linear_regime_end]
+        #),
+     #   label=f"Linear Fit: y = {linear_fit[0]:.2f}x + {linear_fit[1]:.2f} \n R^2 = {r2:.4f}",
+      #  color="red",
+   # )
 
     ax.set_xlabel("Strain (%)")
     ax.set_ylabel("Stress (MPa)")
-    ax.set_title("Stress-Strain Curve")
+    ax.set_title("8k 0.01 to 5mm s-1 25p strain")
     ax.legend()
-    plt.savefig("results/stress_strain_curve.png")
+    plt.savefig("Mechanical/results/2024_05_03 013.A.9 8k10p 0.01 to 5mm s-1 25p.png")
