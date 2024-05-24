@@ -9,6 +9,8 @@ from matplotlib.ticker import ScalarFormatter
 import json
 import os
 
+# TODO: add .svg plot and put legend outside of plot
+
 
 class MechanicalPlot:
     def __init__(
@@ -190,7 +192,8 @@ class MechanicalPlot:
         ax.set_xlabel("Strain (%)")
         ax.set_ylabel("Stress (MPa)")
         ax.set_title(f"{self.root_name}")
-        ax.legend(loc="best", frameon=False)
+        # Plot legend outside of the plot to the right
+        ax.legend(loc="center right", bbox_to_anchor=(1.7, 0.5))
         # y-axis and x-axis ticks
         ax.xaxis.set_minor_locator(AutoMinorLocator(2))
         ax.tick_params(
@@ -205,24 +208,31 @@ class MechanicalPlot:
         # Despines the figure
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-
+        # Add text below the plot with the linear fit threshold and sampling rate
+        ax.text(
+            0.1,
+            -0.2,
+            f"Linear Regime Threshold: {linear_regime_threshold} \n Linear Regime Sampling Rate: {linear_regime_sampling_rate}",
+            horizontalalignment="center",
+            verticalalignment="center",
+            transform=ax.transAxes,
+        )
+        # Save the plot
         plt.savefig(
             self.result_path / f"{self.root_name}.png", dpi=300, bbox_inches="tight"
+        )
+        plt.savefig(
+            self.result_path / f"{self.root_name}.svg", dpi=300, bbox_inches="tight"
         )
 
     def plot_cycle_curves(
         self,
-        cycle_order: list[str] = [
-            "1-Stretch",
-            "2-Stretch",
-            "3-Stretch",
-            "4-Stretch",
-            "5-Stretch",
-            "6-Stretch",
-            "7-Stretch",
-            "8-Stretch",
-            "9-Stretch",
-            "10-Stretch",
+        setname_order: list[str] = [
+            "Tension1 petg rate cycle 0.01",
+            "Tension1 petg rate cycle 0.1",
+            "Tension1 petg rate cycle 0.2",
+            "Tension1 petg rate cycle 2",
+            "Tension1 petg rate cycle 5",
         ],
         color_order: list[str] = [
             "green_blue_1",
@@ -238,24 +248,26 @@ class MechanicalPlot:
         ],
     ):
         fig, ax = plt.subplots(figsize=(6, 4))
-        for cycle in cycle_order:
-            cycle_start_index = self.data.loc[self.data["Cycle"] == cycle].index[0]
-            cycle_end_index = self.data.loc[self.data["Cycle"] == cycle].index[-1]
+        for setname in setname_order:
+            setname_start_index = self.data.loc[self.data["SetName"] == setname].index[
+                0
+            ]
+            setname_end_index = self.data.loc[self.data["SetName"] == setname].index[-1]
             # Plot data
             ax.scatter(
-                self.data["Strain (%)"][cycle_start_index:cycle_end_index],
-                self.data["Stress (MPa)"][cycle_start_index:cycle_end_index],
-                label=cycle,
-                color=self.style["color"][color_order[cycle_order.index(cycle)]],
+                self.data["Strain (%)"][setname_start_index:setname_end_index],
+                self.data["Stress (MPa)"][setname_start_index:setname_end_index],
+                label=setname,
+                color=self.style["color"][color_order[setname_order.index(setname)]],
                 s=5,
             )
-        ax.legend(loc="best", frameon=False)
+        # Plot legend outside of the plot to the right
+        ax.legend(loc="center right", bbox_to_anchor=(1.7, 0.5))
         ax.spines["right"].set_visible(False)
         ax.spines["top"].set_visible(False)
         ax.set_xlabel("Strain (%)")
         ax.set_ylabel("Stress (MPa)")
         ax.set_title(f"{self.root_name}")
-        ax.legend()
         # y-axis and x-axis ticks
         ax.xaxis.set_minor_locator(AutoMinorLocator(2))
         ax.tick_params(

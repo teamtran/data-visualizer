@@ -1,6 +1,8 @@
 from pathlib import Path
 import sys
 
+# import pdb
+
 # sets the path to the root of the repository
 root_path = Path(__file__).parent.parent.parent.resolve()
 sys.path.insert(0, str(root_path))
@@ -21,7 +23,7 @@ data_dir: Path = root_path / "data" / "Mechanical"
 
 filename: str = "2024_03_28 013.A.6 4k10percent 30minvac  Test003Data.csv"
 cycle_filename: str = (
-    "2024_05_03_013_A_9_8k10p_rate cycle 0.2mm s-1 20p Test007Data.csv"
+    "2024_05_03_013_A_9_8k10p_rate cycle 0.01 to 5mm s-1 at 25p Test005Data.csv"
 )
 compression_filename: str = "2024_04_12 013.A.7 8k10percent 4h vac Test023Data.csv"
 
