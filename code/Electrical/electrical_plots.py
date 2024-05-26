@@ -475,6 +475,11 @@ class TransferCurve:
         xfmt.set_powerlimits((-3, 3))
         ax.yaxis.set_major_formatter(xfmt)
         ax.yaxis.major.formatter._useMathText = True
+        ax.xaxis.set_minor_locator(AutoMinorLocator(2))
+        ax.tick_params(
+            axis="both", which="minor", length=3, direction="in"
+        )  # direction and length of minor ticks in X and Y-axis
+        ax.tick_params(axis="both", which="major", length=4, direction="in")
 
         # plot legend of slope, intercept, and R2
         ax.legend(loc="best", frameon=False)
@@ -555,6 +560,11 @@ class TransferCurve:
         xfmt.set_powerlimits((-3, 3))
         ax.yaxis.set_major_formatter(xfmt)
         ax.yaxis.major.formatter._useMathText = True
+        ax.xaxis.set_minor_locator(AutoMinorLocator(2))
+        ax.tick_params(
+            axis="both", which="minor", length=3, direction="in"
+        )  # direction and length of minor ticks in X and Y-axis
+        ax.tick_params(axis="both", which="major", length=4, direction="in")
 
         # plot legend of slope, intercept, and R2
         ax.legend(loc="best", frameon=False)
