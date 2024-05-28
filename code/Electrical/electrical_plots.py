@@ -738,6 +738,7 @@ class OutputCurve:
 
     def plot_output_curve(
         self,
+        xlim: tuple = (-80, 0),
         annotate_x: float = -30,
         num_of_annotate: int = 5,
         color_order: list["str"] = [
@@ -757,8 +758,9 @@ class OutputCurve:
         Plot the output curve of the OFET.
 
         Args:
+            xlim (tuple[float]): x-axis limits for the plot
             annotate_x (float): x value to align the annotations
-            num_of_annotate (int): number of plots to annotate (starting from the last one)
+            num_of_annotate (int): number of plots to annotate (starting from the last one or the one with lowest V_G (i.e. -80V))
         """
         # Find all the columns with "DrainV("", and then plot them all
         num_of_output_curves = 1
@@ -799,8 +801,9 @@ class OutputCurve:
                     xytext=(5, 4),
                     ha="center",
                 )
-        handles, labels = ax.get_legend_handles_labels()
-        # ax.legend(handles[::-1], labels[::-1], loc="best", frameon=False)
+        # set xlimits of the plot
+        ax.set_xlim(xlim)
+        # despine the plot
         ax.spines["right"].set_visible(False)
         ax.spines["top"].set_visible(False)
         ax.set_ylabel("-I$_D$ (A)")  # y-axis label
@@ -873,11 +876,19 @@ class OverlayTransferCurves:
         return up_down_idx
 
     def plot_overlay_transfer_curve(
-        self, labels: list = [], color_order: list = ["blue", "yellow"]
+        self,
+        xlim: tuple = (-80, 0),
+        labels: list = [],
+        color_order: list = ["blue", "yellow"],
     ):
         """
         It is very similar to the plot_transfer_curve method from TransferCurve class.
         However, loads data differently to plot several transfer curves on the same plot.
+
+        Args:
+            xlim (tuple[float]): x-axis limits for the plot
+            labels (list[str]): labels for the plot
+            color_order (list[str]): color order for the plot
         """
         self.color_order = color_order
         assert len(self.color_order) == len(
@@ -903,6 +914,8 @@ class OverlayTransferCurves:
                 color=self.style["color"][self.color_order[color_idx]],
             )
             color_idx += 1
+        # set xlimits of the plot
+        ax.set_xlim(xlim)
         ax.legend(loc="best", frameon=False)
         ax.spines["right"].set_visible(False)
         ax.spines["top"].set_visible(False)
