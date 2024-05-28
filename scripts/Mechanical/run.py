@@ -1,5 +1,7 @@
 from pathlib import Path
 import sys
+from matplotlib import pyplot as plt
+import json
 
 # import pdb
 
@@ -12,6 +14,12 @@ from code.data_util import get_filepath_auto
 
 # Style path
 style_path: Path = root_path / "style" / "style.json"
+# read style file
+style: dict = json.loads(style_path.read_text())
+# defines font, fontsize, and axes linewidth of all of the following plots
+plt.rcParams["font.family"] = style["fontfamily"]
+plt.rcParams["font.size"] = style["fontsize"]
+plt.rcParams["axes.linewidth"] = style["axes_linewidth"]
 
 
 # Result path
