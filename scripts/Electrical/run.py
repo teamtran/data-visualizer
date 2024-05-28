@@ -1,5 +1,7 @@
 from pathlib import Path
 import sys
+from matplotlib import pyplot as plt
+import json
 
 # sets the path to the root of the repository
 root_path = Path(__file__).parent.parent.parent.resolve()
@@ -15,6 +17,12 @@ from code.data_util import get_filepath_auto
 
 # Style path
 style_path: Path = root_path / "style" / "style.json"
+# read style file
+style: dict = json.loads(style_path.read_text())
+# defines font, fontsize, and axes linewidth of all of the following plots
+plt.rcParams["font.family"] = style["fontfamily"]
+plt.rcParams["font.size"] = style["fontsize"]
+plt.rcParams["axes.linewidth"] = style["axes_linewidth"]
 
 # TODO: Change experiment name and filenames
 # Transfer curves
@@ -121,7 +129,7 @@ if __name__ == "__main__":
         style_path,
     )
     plot.plot_overlay_transfer_curve(
-        ["IDT-BT", "IDT-TPD"], color_order=["blue", "yellow"]
+        labels=["IDT-BT", "IDT-TPD"], color_order=["blue", "yellow"]
     )
 
     # Molecular Weight Plots

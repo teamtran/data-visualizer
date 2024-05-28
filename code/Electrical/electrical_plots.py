@@ -12,8 +12,6 @@ from sklearn.metrics import r2_score
 from matplotlib.ticker import ScalarFormatter
 import pdb
 
-# TODO: font, x10-3 on y-axis instead of at the top of the y-axis
-
 
 class TransferCurve:
     """
@@ -221,6 +219,7 @@ class TransferCurve:
                 linewidth=1.5,
                 markersize=12,
                 linestyle="dotted",
+                fontfamily=self.fontfamily,
             )
             # plot linear line that depicts the linear regime for the up_transfer_curve
             # find index of the max and min x values for the up_transfer_curve
@@ -254,6 +253,7 @@ class TransferCurve:
                 linewidth=1.5,
                 markersize=12,
                 linestyle="--",
+                fontfamily=self.fontfamily,
             )
             # plot DrainI and id_up
             ax2.plot(
@@ -263,6 +263,7 @@ class TransferCurve:
                 label="$\mathregular{I_{D}}$, up",
                 linewidth=1.5,
                 markersize=12,
+                fontfamily=self.fontfamily,
             )
 
         elif direction == "down":
@@ -398,8 +399,6 @@ class TransferCurve:
         # Despines the figure
         ax.spines["top"].set_visible(False)
         ax2.spines["top"].set_visible(False)
-
-        # TODO: Create arrows that point from the plot to the y-axis
 
         # Save the figure
         plt.savefig(
@@ -699,7 +698,6 @@ class TransferCurve:
         )
 
 
-# TODO:
 class OutputCurve:
     """
     Class that contains all the methods to plot the output curve.
@@ -840,7 +838,6 @@ class OutputCurve:
         )
 
 
-# TODO:
 class OverlayTransferCurves:
     """
     Class that contains all the methods to overlay transfer curves (without saturation regime).
@@ -897,7 +894,6 @@ class OverlayTransferCurves:
             self.data_dicts
         ), "Number of colors in color_order must match the number of data files in data_paths."
         fig, ax = plt.subplots(figsize=(6, 4))
-        ax.set_yscale("log")
         color_idx = 0
         for data_path, sheet_name in self.data_dicts.items():
             data_path = Path(self.data_dir / data_path)

@@ -1,21 +1,7 @@
 {
-    "graph": {
-        "default": {
-            "font_size": 7,
-            "font_family": "Helvetica",
-            "line_thickness": 1
-        },
-        "maldi": {
-            "font_size": 7,
-            "font_family": "Helvetica",
-            "line_thickness": 0.2
-        }
-    },
-    "legend": {
-        "font_size": 6,
-        "font_family": "Helvetica",
-        "title_font_size": 18
-    },
+    "fontfamily": "Helvetica",
+    "fontsize": 8,
+    "axes_linewidth": 0.5,
     "color": {
         "green_blue_1": "#e0f3db",
         "green_blue_2": "#ccebc5",
