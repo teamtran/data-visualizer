@@ -16,6 +16,7 @@ from code.data_util import get_filepath_auto
 # Style path
 style_path: Path = root_path / "style" / "style.json"
 
+# TODO: Change experiment name and filenames
 # Transfer curves
 # Experiment Name
 experiment_name: str = "AL_1_35L"
@@ -27,13 +28,12 @@ result_path: Path = root_path / "results" / "Electrical" / experiment_name
 data_dir: Path = root_path / "data" / "Electrical" / experiment_name
 
 # Filenames
-# TODO: add filenames and add corresponding (excel sheet) tabs into the dictionary
+# TODO: add filenames and add corresponding (excel sheet) tabs into the dictionary (keys for filename, and values for sheet names)
 transfer_curve_data_filenames: dict = {
     "2024_05_07_AL_1_35L_1A_3.xls": ["AL_1_35L_1A_3"]
 }
 
 # Output curve filename
-
 output_curve_data_filenames: dict = {
     "2024_05_07_OC_AL_1_35L_1A_1.xls": ["OC_AL_1_35L_1A_1"]
 }

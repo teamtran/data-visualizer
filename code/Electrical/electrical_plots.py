@@ -12,6 +12,8 @@ from sklearn.metrics import r2_score
 from matplotlib.ticker import ScalarFormatter
 import pdb
 
+# TODO: font, x10-3 on y-axis instead of at the top of the y-axis
+
 
 class TransferCurve:
     """
@@ -878,7 +880,7 @@ class OverlayTransferCurves:
     def plot_overlay_transfer_curve(
         self,
         xlim: tuple = (-80, 0),
-        labels: list = [],
+        labels: list = None,
         color_order: list = ["blue", "yellow"],
     ):
         """
