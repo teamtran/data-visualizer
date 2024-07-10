@@ -489,7 +489,7 @@ class TransferCurve:
         ax.spines["top"].set_visible(False)
 
         plt.savefig(
-            self.result_dir / f"{self.root_name}/up_saturation_{self.sheet_name}svg",
+            self.result_dir / f"{self.root_name}/up_saturation_{self.sheet_name}.svg",
             dpi=300,
             bbox_inches="tight",
         )
