@@ -148,6 +148,11 @@ class TGAPlots:
             / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z.png",
             dpi=400,
         )
+        plt.savefig(
+            self.result_dir
+            / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z.svg",
+            dpi=400,
+        )
 
     def plot_tga_dynamic(
         self,
@@ -217,6 +222,10 @@ class TGAPlots:
         ax[1].set_xlim(xlim)
         plt.savefig(
             self.result_dir / f"{self.result_name}tga_dynamic_{target_mass}m_z.png",
+            dpi=400,
+        )
+        plt.savefig(
+            self.result_dir / f"{self.result_name}tga_dynamic_{target_mass}m_z.svg",
             dpi=400,
         )
 
@@ -293,5 +302,10 @@ class TGAPlots:
         plt.savefig(
             self.result_dir
             / f"{self.result_name}ms_peak_area_{m_z_start}_{m_z_end}_{isothermal_temp}.png",
+            dpi=400,
+        )
+        plt.savefig(
+            self.result_dir
+            / f"{self.result_name}ms_peak_area_{m_z_start}_{m_z_end}_{isothermal_temp}.svg",
             dpi=400,
         )

@@ -106,6 +106,7 @@ class MechanicalPlot:
             linear_regime_choice: int = 0  # first linear regime
             x = self.data["Strain (%)"]
             y = self.data["Stress (MPa)"]
+
         # calculate first normalized gradient
         first_derivative = np.gradient(y[::sampling_rate], x[::sampling_rate])
         first_norms = np.linalg.norm(first_derivative, axis=0)

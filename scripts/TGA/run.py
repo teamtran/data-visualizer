@@ -60,9 +60,9 @@ dynamic_ms_filenames: list = [
     "ExpDat_2024_06_28_PS2439_6_1K_dynamic-0_1K_min-aeolos.csv",
 ]
 
-# labels: list = ["PS-SCF3", "PS-6.1K"]
-# labels: list = ["PS-SCF3", "PS-6.1K", "PS-SCF3-slow", "PS-6.1K-slow"]
-labels: list = ["PS-SCF3-0_1K_min", "PS-6_1K-0_1K_min"]
+# labels: list = ["PS-SCF3-1K_min", "PS-6.1K-1K_min"]
+labels: list = ["PS-SCF3", "PS-6.1K"]
+# labels: list = ["PS-SCF3-0_1K_min", "PS-6_1K-0_1K_min"]
 
 if __name__ == "__main__":
     isothermal_tga_plots = TGAPlots(
@@ -77,13 +77,13 @@ if __name__ == "__main__":
     # TODO: must change temp and xlimit depending on the isothermal conditions!
     isothermal_tga_plots.plot_tga_isothermal(
         isothermal_temp=260,
-        xlim=(0, 3000),
-        ylim=(60, 100),
+        xlim=(190, 3000),
+        ylim=(70, 100),
         target_mass=104,
-        initial_correction_time=250,
+        initial_correction_time=190,
     )
     # isothermal_tga_plots.plot_ms_peak_area(
-    #     "isothermal", 300, initial_time=40, end_time=3000, m_z_start=60, m_z_end=150
+    #     "isothermal", 260, initial_time=250, end_time=3000, m_z_start=60, m_z_end=150
     # )
     # dynamic_tga_plots = TGAPlots(
     #     data_dir=data_dir,
@@ -97,6 +97,6 @@ if __name__ == "__main__":
     # dynamic_tga_plots.plot_tga_dynamic(
     #     t_depolymerization_cutoff=99.5,
     #     target_mass=104,
-    #     xlim=(220, 350),
+    #     xlim=(230, 350),
     #     initial_correction_temp=230,
     # )
