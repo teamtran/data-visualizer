@@ -53,9 +53,9 @@ class PhotophysicalPlots:
         drop_columns: list[int],
         normalize: bool,
         baseline: bool,
+        xlim: tuple,
     ) -> pd.DataFrame:
         """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to photophysical."""
-        # TODO: Photoluminescence
         # Get all index of columns
         temp_data = pd.read_excel(self.uv_vis_data_path)
         columns = range(0, len(temp_data.columns))
@@ -64,35 +64,77 @@ class PhotophysicalPlots:
         # Drop all rows after the data (i.e. drop the metadata)
         # Find row all NaNs
         row_to_drop = temp_data[temp_data.isnull().all(axis=1)].index[0]
-
         num_of_rows = len(temp_data.index)
         skiprows = list(range(row_to_drop, num_of_rows + 1))
         skiprows.append(1)  # skip row with wavelength and absorbance
         uv_vis_data = pd.read_excel(
             self.uv_vis_data_path, usecols=use_columns, skiprows=skiprows
         )
-        # Baseline correction
+        # cut off data according to xlim
+        # find index of wavelength closest to xlim
+        idx_xlim_low = (np.abs(uv_vis_data.iloc[:, 0] - xlim[0])).idxmin()
+        idx_xlim_high = (np.abs(uv_vis_data.iloc[:, 0] - xlim[1])).idxmin()
         for expt in self.uv_vis_experiment_names:
             # get all column_idx with expt name
             column_idx = [
                 i + 1 for i, column in enumerate(uv_vis_data.columns) if expt in column
             ]
             for col_idx in column_idx:
+                # Baseline correction
                 if baseline:
-                    absorbance = uv_vis_data.iloc[:, col_idx]
+                    absorbance = uv_vis_data.iloc[idx_xlim_high:idx_xlim_low, col_idx]
                     min_absorbance = min(absorbance)
-                    uv_vis_data.iloc[:, col_idx] = absorbance - min_absorbance
+                    uv_vis_data.iloc[idx_xlim_high:idx_xlim_low, col_idx] = (
+                        absorbance - min_absorbance
+                    )
                 # Normalize data
                 if normalize:  # divide by max absorbance
-                    absorbance = uv_vis_data.iloc[:, col_idx]
+                    absorbance = uv_vis_data.iloc[idx_xlim_high:idx_xlim_low, col_idx]
                     max_absorbance = max(absorbance)
-                    absorbance = absorbance / max_absorbance
+                    uv_vis_data.iloc[idx_xlim_high:idx_xlim_low, col_idx] = (
+                        absorbance / max_absorbance
+                    )
             # average triplicates
             uv_vis_data[expt + "_wavelength"] = uv_vis_data.iloc[
-                :, col_idx - 1
+                idx_xlim_high:idx_xlim_low, col_idx - 1
             ]  # wavelength from last replicate
-            uv_vis_data[expt + "_avg"] = uv_vis_data.iloc[:, column_idx].mean(axis=1)
-        return uv_vis_data
+            uv_vis_data[expt + "_avg"] = uv_vis_data.iloc[
+                idx_xlim_high:idx_xlim_low, column_idx
+            ].mean(axis=1)
+
+        # photoluminescence data
+        pl_data = pd.read_excel(self.photoluminescence_data_path, skiprows=[1])
+        # find index of wavelength closest to xlim
+        idx_xlim_low = (np.abs(pl_data.iloc[:, 0] - xlim[0])).idxmin()
+        idx_xlim_high = (np.abs(pl_data.iloc[:, 0] - xlim[1])).idxmin()
+        for expt in self.photoluminescence_experiment_names:
+            # get all column_idx with expt name
+            column_idx = [
+                i for i, column in enumerate(pl_data.columns) if expt in column
+            ]
+            for col_idx in column_idx:
+                # Baseline correction
+                if baseline:
+                    absorbance = pl_data.iloc[idx_xlim_low:idx_xlim_high, col_idx]
+                    min_absorbance = min(absorbance)
+                    pl_data.iloc[idx_xlim_low:idx_xlim_high, col_idx] = (
+                        absorbance - min_absorbance
+                    )
+                # Normalize data
+                if normalize:  # divide by max absorbance
+                    absorbance = pl_data.iloc[idx_xlim_low:idx_xlim_high, col_idx]
+                    max_absorbance = max(absorbance)
+                    pl_data.iloc[idx_xlim_low:idx_xlim_high, col_idx] = (
+                        absorbance / max_absorbance
+                    )
+            # average triplicates
+            pl_data[expt + "_wavelength"] = pl_data.iloc[
+                idx_xlim_low:idx_xlim_high, col_idx - 1
+            ]  # wavelength from last replicate
+            pl_data[expt + "_avg"] = pl_data.iloc[
+                idx_xlim_low:idx_xlim_high, column_idx
+            ].mean(axis=1)
+        return uv_vis_data, pl_data
 
     def plot_photophysical(
         self,
@@ -106,25 +148,41 @@ class PhotophysicalPlots:
         Function that plots photophysical data.
         """
         fig, ax = plt.subplots(figsize=(7, 5))
-        plt.tight_layout(pad=3)
-        # aesthetics
+        plt.tight_layout(pad=5)
+        # uv_vis plot
         ax.set_xlabel("Wavelength (nm)", fontsize=12)
         ax.set_ylabel("Normalized Absorbance (a.u.)", fontsize=12)
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
         ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
+        # pl plot
+        ax2 = ax.twinx()
+        ax2.set_ylabel("Normalized PL Intensity (a.u.)", fontsize=12)
+        ax2.spines["top"].set_visible(False)
+        ax2.spines["left"].set_visible(False)
+        ax2.tick_params(axis="both", which="major", labelsize=12, direction="in")
         i = 0
         # TODO: photoluminescence
-        uv_vis_data = self.preprocess(drop_columns, normalize, baseline)
+        uv_vis_data, pl_data = self.preprocess(drop_columns, normalize, baseline, xlim)
 
-        for expt_name, label, color in zip(
-            self.uv_vis_experiment_names, self.labels, self.colors
+        for uv_vis_expt_name, pl_expt_name, label, color in zip(
+            self.uv_vis_experiment_names,
+            self.photoluminescence_experiment_names,
+            self.labels,
+            self.colors,
         ):
             ax.plot(
-                uv_vis_data[expt_name + "_wavelength"],  # x-axis
-                uv_vis_data[expt_name + "_avg"],  # y-axis
+                uv_vis_data[uv_vis_expt_name + "_wavelength"],  # x-axis
+                uv_vis_data[uv_vis_expt_name + "_avg"],  # y-axis
                 label=label,
                 color=color,
+            )
+            ax2.plot(
+                pl_data[pl_expt_name + "_wavelength"],  # x-axis
+                pl_data[pl_expt_name + "_avg"],  # y-axis
+                label=label,
+                color=color,
+                linestyle="--",
             )
             i += 1
         legend = ax.legend(

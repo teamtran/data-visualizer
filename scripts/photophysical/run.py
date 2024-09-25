@@ -31,10 +31,10 @@ data_dir: Path = root_path / "data" / "photophysical" / experiment_name
 
 # Filenames
 uv_vis_filename: str = "AL_1_45_D_E_F.xlsx"
-photoluminescence_filename: str = "AL_1_45_D_E_F.xlsx"
+photoluminescence_filename: str = "AL_1_45_D_PL.xlsx"
 
 uv_vis_experiment_names: list[str] = ["AL_1_45D_0.05mgml_water"]
-photoluminescence_experiment_names: list[str] = ["AL_1_45D_0.05mgml_water"]
+photoluminescence_experiment_names: list[str] = ["Emission AL-1-35L high"]
 
 labels: list = ["AL_1_45_D"]
 
@@ -55,6 +55,6 @@ if __name__ == "__main__":
         drop_columns=[0, 1, 2, 3],
         normalize=True,
         baseline=True,
-        xlim=(200, 800),
+        xlim=(300, 800),
         ylim=(-0.1, 1.1),
     )
