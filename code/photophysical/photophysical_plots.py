@@ -23,8 +23,9 @@ class PhotophysicalPlots:
         self,
         data_dir: Path,
         uv_vis_data_path: Path,
-        fluorescence_data_path: Path,
-        experiment_name: list[str],
+        photoluminescence_data_path: Path,
+        uv_vis_experiment_names: list[str],
+        photoluminescence_experiment_names: list[str],
         labels: list[str],
         colors: list[str],
         result_dir: Path,
@@ -34,8 +35,10 @@ class PhotophysicalPlots:
         Initialize the class with the data path and the result directory.
         """
         self.data_dir = data_dir
-        self.uv_vis_data_path = uv_vis_data_path
-        self.experiment_name = experiment_name
+        self.uv_vis_data_path = data_dir / uv_vis_data_path
+        self.photoluminescence_data_path = data_dir / photoluminescence_data_path
+        self.uv_vis_experiment_names = uv_vis_experiment_names
+        self.photoluminescence_experiment_names = photoluminescence_experiment_names
         self.labels = labels
         self.colors = colors
         self.result_dir = result_dir
@@ -47,30 +50,52 @@ class PhotophysicalPlots:
 
     def preprocess(
         self,
-        uv_vis_data_path: Path,
         drop_columns: list[int],
         normalize: bool,
         baseline: bool,
     ) -> pd.DataFrame:
-        """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to uv_vis."""
+        """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to photophysical."""
+        # TODO: Photoluminescence
         # Get all index of columns
-        temp_data = pd.read_excel(uv_vis_data_path)
+        temp_data = pd.read_excel(self.uv_vis_data_path)
         columns = range(0, len(temp_data.columns))
         # Drop columns
         use_columns = [x for x in columns if x not in drop_columns]
-        uv_vis_data = pd.read_excel(uv_vis_data_path, usecols=use_columns, skiprows=[1])
-        # Baseline correction
-        if baseline:
-            pass
-        # Normalize data
-        if normalize:
-            pass
-        # TODO: triplicates
-        return uv_vis_data_path
+        # Drop all rows after the data (i.e. drop the metadata)
+        # Find row all NaNs
+        row_to_drop = temp_data[temp_data.isnull().all(axis=1)].index[0]
 
-    def plot_uv_vis(
+        num_of_rows = len(temp_data.index)
+        skiprows = list(range(row_to_drop, num_of_rows + 1))
+        skiprows.append(1)  # skip row with wavelength and absorbance
+        uv_vis_data = pd.read_excel(
+            self.uv_vis_data_path, usecols=use_columns, skiprows=skiprows
+        )
+        # Baseline correction
+        for expt in self.uv_vis_experiment_names:
+            # get all column_idx with expt name
+            column_idx = [
+                i + 1 for i, column in enumerate(uv_vis_data.columns) if expt in column
+            ]
+            for col_idx in column_idx:
+                if baseline:
+                    absorbance = uv_vis_data.iloc[:, col_idx]
+                    min_absorbance = min(absorbance)
+                    uv_vis_data.iloc[:, col_idx] = absorbance - min_absorbance
+                # Normalize data
+                if normalize:  # divide by max absorbance
+                    absorbance = uv_vis_data.iloc[:, col_idx]
+                    max_absorbance = max(absorbance)
+                    absorbance = absorbance / max_absorbance
+            # average triplicates
+            uv_vis_data[expt + "_wavelength"] = uv_vis_data.iloc[
+                :, col_idx - 1
+            ]  # wavelength from last replicate
+            uv_vis_data[expt + "_avg"] = uv_vis_data.iloc[:, column_idx].mean(axis=1)
+        return uv_vis_data
+
+    def plot_photophysical(
         self,
-        uv_vis_metadata: list[str],
         drop_columns: list[int],
         normalize: bool,
         baseline: bool,
@@ -78,7 +103,7 @@ class PhotophysicalPlots:
         ylim: tuple = (-0.1, 1),
     ):
         """
-        Function that plots uv_vis data.
+        Function that plots photophysical data.
         """
         fig, ax = plt.subplots(figsize=(7, 5))
         plt.tight_layout(pad=3)
@@ -89,15 +114,15 @@ class PhotophysicalPlots:
         ax.spines["right"].set_visible(False)
         ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
         i = 0
-        for uv_vis_file, label, color in zip(
-            self.uv_vis_data_path, self.labels, self.colors
+        # TODO: photoluminescence
+        uv_vis_data = self.preprocess(drop_columns, normalize, baseline)
+
+        for expt_name, label, color in zip(
+            self.uv_vis_experiment_names, self.labels, self.colors
         ):
-            uv_vis_data = self.preprocess(
-                uv_vis_data, drop_columns, normalize, baseline
-            )  # normalize data
             ax.plot(
-                uv_vis_data[uv_vis_data.columns[0]],
-                uv_vis_data[uv_vis_data.columns[1]],
+                uv_vis_data[expt_name + "_wavelength"],  # x-axis
+                uv_vis_data[expt_name + "_avg"],  # y-axis
                 label=label,
                 color=color,
             )
@@ -105,22 +130,13 @@ class PhotophysicalPlots:
         legend = ax.legend(
             loc="upper right",
             frameon=False,
-            title="Experiment Conditions",
+            title="Sample IDs",
             fontsize=8,
         )
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
-        # add another legend for uv_vis data (Mn, Mw, PDI)
-        legend_handles = ax.get_legend_handles_labels()[0]
-        uv_vis_legend = (legend_handles, uv_vis_metadata)
-        uv_vis_metadata_legend = ax.legend(
-            uv_vis_legend,
-            labels=uv_vis_metadata,
-            loc="center right",
-            frameon=False,
-            title="uv_vis Data",
-            fontsize=8,
-        )
         ax.add_artist(legend)
 
-        plt.savefig(self.result_dir / f"{self.result_name}uv_vis_plot.png", dpi=400)
+        plt.savefig(
+            self.result_dir / f"{self.result_name}photophysical_plot.png", dpi=400
+        )
