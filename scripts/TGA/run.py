@@ -31,20 +31,22 @@ data_dir: Path = root_path / "data" / "TGA" / experiment_name
 
 # Filenames
 isothermal_filenames: list = [
-    # "ExpDat_2024_06_21_005c-B_300C_isotherm.csv",
-    # "ExpDat_2024_06_21_PS2439_6_1K_300C_isotherm.csv",
+    "ExpDat_2024_06_21_005c-B_300C_isotherm.csv",
+    "ExpDat_2024_06_21_PS2439_6_1K_300C_isotherm.csv",
     # "ExpDat_2024_06_18_005c-B_350C_isotherm.csv",
     # "ExpDat_2024_06_17_PS2439_6_1K_350C_isotherm.csv",
-    "ExpDat_2024_07_02_005c-B_260C_isotherm.csv",
-    "ExpDat_2024_07_02_PS2439_6_1K_260C_isotherm.csv",
+    # "ExpDat_2024_07_02_005c-B_260C_isotherm.csv",
+    # "ExpDat_2024_07_02_PS2439_6_1K_260C_isotherm.csv",
+    # "ExpDat_2024_08_11_PS2439_6_1K_depoly_temp_analysis.csv"
 ]
 isothermal_ms_filenames: list = [
-    # "ExpDat_2024_06_21_005c-B_300C_isotherm-aeolos.csv",
-    # "ExpDat_2024_06_21_PS2439_6_1K_300C_isotherm-aeolos.csv",
+    "ExpDat_2024_06_21_005c-B_300C_isotherm-aeolos.csv",
+    "ExpDat_2024_06_21_PS2439_6_1K_300C_isotherm-aeolos.csv",
     # "ExpDat_2024_06_18_005c-B_350C_isotherm-aeolos.csv",
     # "ExpDat_2024_06_17_PS2439_6_1K_350C_isotherm-aeolos.csv",
-    "ExpDat_2024_07_02_005c-B_260C_isotherm-aeolos.csv",
-    "ExpDat_2024_07_02_PS2439_6_1K_260C_isotherm-aeolos.csv",
+    # "ExpDat_2024_07_02_005c-B_260C_isotherm-aeolos.csv",
+    # "ExpDat_2024_07_02_PS2439_6_1K_260C_isotherm-aeolos.csv",
+    # "ExpDat_2024_08_11_PS2439_6_1K_depoly_temp_analysis-aeolos.csv"
 ]
 
 dynamic_filenames: list = [
@@ -76,15 +78,17 @@ if __name__ == "__main__":
     )
     # TODO: must change temp and xlimit depending on the isothermal conditions!
     isothermal_tga_plots.plot_tga_isothermal(
-        isothermal_temp=260,
-        xlim=(190, 3000),
-        ylim=(70, 100),
+        isothermal_temp=300,
+        xlim=(0, 1500),
+        ylim=(0, 110),
         target_mass=104,
-        initial_correction_time=190,
+        initial_correction_time=100,
+        uncertainty=False,
+        time_for_mass_difference=1450,
     )
-    # isothermal_tga_plots.plot_ms_peak_area(
-    #     "isothermal", 260, initial_time=250, end_time=3000, m_z_start=60, m_z_end=150
-    # )
+    isothermal_tga_plots.plot_ms_peak_area(
+        "isothermal", 300, initial_time=0, end_time=1500, m_z_start=60, m_z_end=150
+    )
     # dynamic_tga_plots = TGAPlots(
     #     data_dir=data_dir,
     #     tga_data_path=dynamic_filenames,

@@ -14,6 +14,13 @@ from matplotlib.ticker import ScalarFormatter
 import pdb
 
 
+def _find_empty_row(data: pd.DataFrame):
+    # get length of dataframe to get index of empty row
+    num_skiprows = len(data) + 3
+
+    return num_skiprows
+
+
 class TGAPlots:
     """
     Class that contains methods to plot TGA-MS (dynamic, isothermal) data.
@@ -49,15 +56,28 @@ class TGAPlots:
         tga_data: pd.DataFrame,
         ms_data: pd.DataFrame,
         initial_correction: float,
+        initial_mass: float,
         time_or_temp: str = "Time",
     ) -> pd.DataFrame:
         """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to TGA-MS."""
-        # Remove % sign from columns in tga_raw_data
-        tga_data.columns = tga_data.columns.str.replace("%", "pct")
         # Truncate Temp./C column to Temp
         tga_data.columns = tga_data.columns.str.replace(tga_data.columns[0], "Temp")
         # Truncate Temp./C column to Temp in ms_raw_data
         ms_data.columns = ms_data.columns.str.replace(ms_data.columns[0], "Temp")
+
+        # Account for uncertainty: balance drift (0.002mg/hr); balance uncertainty (2.5e-5mg)
+        tga_data["mass_loss_uncertainty"] = (
+            tga_data["Time/min"] * (0.002 / 60) + 0.000025
+        )
+        # Convert masses to pct
+        tga_data["Mass loss/pct"] = (
+            (initial_mass + tga_data["Mass loss/mg"]) * 100
+        ) / initial_mass
+
+        tga_data["mass_loss_pct_uncertainty"] = (
+            tga_data["mass_loss_uncertainty"] * 100 / initial_mass
+        )
+
         # find the row closest to the initial_correction_time for tga_data
         if time_or_temp == "Time":
             initial_correction_row: int = tga_data.iloc[
@@ -75,13 +95,26 @@ class TGAPlots:
             initial_correction_row_ms: int = ms_data.iloc[
                 (ms_data["Temp"] - initial_correction).abs().argsort()[:1]
             ].index[0]
-        # Subtract 100 from the Mass/% datapoint from the initial_correction_time_row
-        correction_mass = 100 - tga_data["Mass/pct"][initial_correction_row]
-        tga_data["Mass/pct"] = tga_data["Mass/pct"] + correction_mass
+        # Subtract 0 from the Mass loss/mg datapoint from the initial_correction_time_row
+        correction_mass = 100 - tga_data["Mass loss/pct"][initial_correction_row]
+        tga_data["Mass loss/pct"] = tga_data["Mass loss/pct"] + correction_mass
         # Remove the rows before the initial_correction_time_row for both tga_data and ms_data
         tga_data = tga_data.iloc[initial_correction_row:]
         ms_data = ms_data.iloc[initial_correction_row_ms:]
+
         return tga_data, ms_data
+
+    def get_mass_at_time(self, time: float, tga_data: pd.DataFrame) -> float:
+        """
+        Get the mass at a specific time for the TGA data.
+        """
+        mass_pct = (
+            tga_data["Mass loss/pct"]
+            .iloc[(tga_data["Time/min"] - time).abs().argsort()[:1]]
+            .values[0]
+        )
+
+        return mass_pct
 
     def plot_tga_isothermal(
         self,
@@ -90,6 +123,8 @@ class TGAPlots:
         xlim: tuple = (0, 1450),
         ylim: tuple = (0, 100),
         initial_correction_time: int = 50,
+        uncertainty: bool = True,
+        time_for_mass_difference: float = 1450,
     ):
         """
         Plot several TGA isothermal data for comparison (can handle 1 or more).
@@ -113,15 +148,21 @@ class TGAPlots:
         ax[0].set_xlim(xlim)
         ax[1].set_xlim(xlim)
         ax[0].set_ylim(ylim)
-        ax[1].set_ylim(0, 1e-12)
+        # ax[1].set_ylim(0, 0.2e-12)
+        mass_difference_at_time = []
         for tga_path, ms_path, label, color in zip(
             self.tga_data_path, self.ms_data_path, self.labels, self.colors
         ):
             tga_data = pd.read_csv(
+                self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="warn"
+            )
+            initial_mass: float = float(tga_data.at[17, tga_data.columns[1]])
+            num_skiprows: int = _find_empty_row(tga_data)
+            tga_data = pd.read_csv(
                 self.data_dir / tga_path,
                 encoding="iso-8859-1",
-                on_bad_lines="warn",
-                skiprows=38,
+                on_bad_lines="skip",
+                skiprows=num_skiprows,
             )
             ms_data = pd.read_csv(
                 self.data_dir / ms_path,
@@ -130,17 +171,40 @@ class TGAPlots:
                 skiprows=29,
             )
             tga_data, ms_data = self.preprocess(
-                tga_data, ms_data, initial_correction_time, "Time"
+                tga_data, ms_data, initial_correction_time, initial_mass, "Time"
+            )
+            mass_difference_at_time.append(
+                self.get_mass_at_time(time_for_mass_difference, tga_data)
             )
             ax[0].plot(
-                tga_data["Time/min"], tga_data["Mass/pct"], label=label, color=color
+                tga_data["Time/min"],
+                tga_data["Mass loss/pct"],
+                label=label,
+                color=color,
+                linewidth=1,
             )
+            if uncertainty:
+                ax[0].fill_between(
+                    tga_data["Time/min"],
+                    tga_data["Mass loss/pct"] - tga_data["mass_loss_pct_uncertainty"],
+                    tga_data["Mass loss/pct"] + tga_data["mass_loss_pct_uncertainty"],
+                    alpha=0.3,
+                    facecolor=color,
+                )
             ax[1].plot(
                 ms_data["Time/min"],
                 ms_data[f"QMID(s:1|m:{target_mass})/A"],
                 label=label,
                 color=color,
+                linewidth=1,
             )
+        ax[0].axhline(
+            y=100,
+            color="r",
+            linestyle="--",
+            linewidth=0.5,
+            label="100% Mass",
+        )
         ax[0].legend()
         ax[1].legend()
         plt.savefig(
@@ -152,6 +216,9 @@ class TGAPlots:
             self.result_dir
             / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z.svg",
             dpi=400,
+        )
+        print(
+            f"Mass difference at {time_for_mass_difference} min: {mass_difference_at_time}"
         )
 
     def plot_tga_dynamic(
@@ -199,7 +266,9 @@ class TGAPlots:
             tga_data, ms_data = self.preprocess(
                 tga_data, ms_data, initial_correction_temp, "Temp"
             )
-            ax[0].plot(tga_data["Temp"], tga_data["Mass/pct"], label=label, color=color)
+            ax[0].plot(
+                tga_data["Temp"], tga_data["Mass loss/mg"], label=label, color=color
+            )
             ax[1].plot(
                 ms_data["Temp"],
                 ms_data[f"QMID(s:1|m:{target_mass})/A"],

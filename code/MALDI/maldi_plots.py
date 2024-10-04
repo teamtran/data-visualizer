@@ -92,7 +92,13 @@ class MALDIPlots:
             ms_data = pd.read_csv(self.data_dir / ms_path, sep=" ", header=None)
             ms_data = ms_data.rename(columns={0: "m/z", 1: "Intensity"})
             ms_data = self.preprocess(ms_data, xlim=xlim, normalize=True)
-            ax.plot(ms_data["m/z"], ms_data["Intensity"], label=label, color=color)
+            ax.plot(
+                ms_data["m/z"],
+                ms_data["Intensity"],
+                label=label,
+                color=color,
+                linewidth=1,
+            )
         ax.set_title(title + "MALDI", pad=20, fontsize=16)
         ax.legend()
         plt.savefig(
