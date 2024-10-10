@@ -170,17 +170,23 @@ class PhotophysicalPlots:
         fig, ax = plt.subplots(figsize=(7, 5))
         plt.tight_layout(pad=5)
         # uv_vis plot
-        ax.set_xlabel("Wavelength (nm)", fontsize=12)
-        ax.set_ylabel("Normalized Absorbance (a.u.)", fontsize=12)
+        ax.set_xlabel("Wavelength (nm)", fontsize=self.style["fontsize"])
+        ax.set_ylabel("Normalized Absorbance (a.u.)", fontsize=self.style["fontsize"])
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
+        ax.tick_params(
+            axis="both", which="major", labelsize=self.style["fontsize"], direction="in"
+        )
         # pl plot
         ax2 = ax.twinx()
-        ax2.set_ylabel("Normalized PL Intensity (a.u.)", fontsize=12)
+        ax2.set_ylabel(
+            "Normalized PL Intensity (a.u.)", fontsize=self.style["fontsize"]
+        )
         ax2.spines["top"].set_visible(False)
         ax2.spines["left"].set_visible(False)
-        ax2.tick_params(axis="both", which="major", labelsize=12, direction="in")
+        ax2.tick_params(
+            axis="both", which="major", labelsize=self.style["fontsize"], direction="in"
+        )
         i = 0
         # TODO: photoluminescence
         uv_vis_data, pl_data = self.preprocess(drop_columns, normalize, baseline, xlim)
@@ -195,21 +201,21 @@ class PhotophysicalPlots:
                 uv_vis_data[uv_vis_expt_name + "_wavelength"],  # x-axis
                 uv_vis_data[uv_vis_expt_name + "_avg"],  # y-axis
                 label=label,
-                color=color,
+                color=self.style["color"][color],
             )
             ax2.plot(
                 pl_data[pl_expt_name + "_wavelength"],  # x-axis
                 pl_data[pl_expt_name + "_avg"],  # y-axis
                 label=label,
-                color=color,
-                linestyle="--",
+                color=self.style["color"][color],
+                linestyle="--",  # https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
             )
             i += 1
         legend = ax.legend(
             loc="upper right",
             frameon=False,
             title="Sample IDs",
-            fontsize=8,
+            fontsize=self.style["fontsize"],
         )
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
@@ -231,11 +237,13 @@ class PhotophysicalPlots:
         fig, ax = plt.subplots(figsize=(7, 5))
         plt.tight_layout(pad=5)
         # uv_vis plot
-        ax.set_xlabel("Wavelength (nm)", fontsize=12)
-        ax.set_ylabel("Normalized Absorbance (a.u.)", fontsize=12)
+        ax.set_xlabel("Wavelength (nm)", fontsize=self.style["fontsize"])
+        ax.set_ylabel("Normalized Absorbance (a.u.)", fontsize=self.style["fontsize"])
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
+        ax.tick_params(
+            axis="both", which="major", labelsize=self.style["fontsize"], direction="in"
+        )
         i = 0
         uv_vis_data, pl_data = self.preprocess(drop_columns, normalize, baseline, xlim)
 
@@ -248,14 +256,14 @@ class PhotophysicalPlots:
                 uv_vis_data[uv_vis_expt_name + "_wavelength"],  # x-axis
                 uv_vis_data[uv_vis_expt_name + "_avg"],  # y-axis
                 label=label,
-                color=color,
+                color=self.style["color"][color],
             )
             i += 1
         legend = ax.legend(
             loc="upper right",
             frameon=False,
             title="Sample IDs",
-            fontsize=8,
+            fontsize=self.style["fontsize"],
         )
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
@@ -277,10 +285,12 @@ class PhotophysicalPlots:
         fig, ax = plt.subplots(figsize=(7, 5))
         plt.tight_layout(pad=5)
         # pl plot
-        ax.set_ylabel("Normalized PL Intensity (a.u.)", fontsize=12)
+        ax.set_ylabel("Normalized PL Intensity (a.u.)", fontsize=self.style["fontsize"])
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
+        ax.tick_params(
+            axis="both", which="major", labelsize=self.style["fontsize"], direction="in"
+        )
         i = 0
         # TODO: photoluminescence
         uv_vis_data, pl_data = self.preprocess(drop_columns, normalize, baseline, xlim)
@@ -294,15 +304,15 @@ class PhotophysicalPlots:
                 pl_data[pl_expt_name + "_wavelength"],  # x-axis
                 pl_data[pl_expt_name + "_avg"],  # y-axis
                 label=label,
-                color=color,
-                linestyle="--",
+                color=self.style["color"][color],
+                linestyle="--",  # https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
             )
             i += 1
         legend = ax.legend(
             loc="upper right",
             frameon=False,
             title="Sample IDs",
-            fontsize=8,
+            fontsize=self.style["fontsize"],
         )
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)

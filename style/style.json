@@ -1,6 +1,6 @@
 {
     "fontfamily": "Helvetica",
-    "fontsize": 8,
+    "fontsize": 10,
     "axes_linewidth": 0.5,
     "color": {
         "green_blue_1": "#e0f3db",

@@ -45,7 +45,7 @@ photoluminescence_experiment_names: list[str] = [
 ]
 
 labels: list = ["AL_1_45_D", "AL_1_45_E", "AL_1_45_F"]
-
+colors = ["blue", "green", "yellow"]
 
 if __name__ == "__main__":
     uv_vis_plots = PhotophysicalPlots(
@@ -55,7 +55,7 @@ if __name__ == "__main__":
         uv_vis_experiment_names=uv_vis_experiment_names,
         photoluminescence_experiment_names=photoluminescence_experiment_names,
         labels=labels,
-        colors=["#8286ff", "#ff8c00", "#ff0000"],
+        colors=colors,
         result_dir=result_path,
         style_path=style_path,
     )
@@ -63,14 +63,14 @@ if __name__ == "__main__":
         drop_columns=[0, 1, 2, 3],
         normalize=True,
         baseline=True,
-        xlim=(300, 800),
+        xlim=(200, 800),
         ylim=(-0.1, 1.1),
     )
     uv_vis_plots.plot_uv_vis(
         drop_columns=[0, 1, 2, 3],
         normalize=True,
         baseline=True,
-        xlim=(300, 800),
+        xlim=(200, 800),
         ylim=(-0.1, 1.1),
     )
     uv_vis_plots.plot_pl(
