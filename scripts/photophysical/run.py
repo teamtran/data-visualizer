@@ -33,10 +33,18 @@ data_dir: Path = root_path / "data" / "photophysical" / experiment_name
 uv_vis_filename: str = "AL_1_45_D_E_F.xlsx"
 photoluminescence_filename: str = "AL_1_45_D_PL.xlsx"
 
-uv_vis_experiment_names: list[str] = ["AL_1_45D_0.05mgml_water"]
-photoluminescence_experiment_names: list[str] = ["Emission AL-1-35L high"]
+uv_vis_experiment_names: list[str] = [
+    "AL_1_45D_0.05mgml_water",
+    "AL_1_45E_0.1mgml_water",
+    "AL_1_45F_0.1mgml_water",
+]
+photoluminescence_experiment_names: list[str] = [
+    "Emission AL-1-35L low",
+    "Emission AL-1-35L med",
+    "Emission AL-1-35L high",
+]
 
-labels: list = ["AL_1_45_D"]
+labels: list = ["AL_1_45_D", "AL_1_45_E", "AL_1_45_F"]
 
 
 if __name__ == "__main__":
@@ -47,14 +55,28 @@ if __name__ == "__main__":
         uv_vis_experiment_names=uv_vis_experiment_names,
         photoluminescence_experiment_names=photoluminescence_experiment_names,
         labels=labels,
-        colors=["#8286ff"],
+        colors=["#8286ff", "#ff8c00", "#ff0000"],
         result_dir=result_path,
         style_path=style_path,
     )
-    uv_vis_plots.plot_photophysical(
+    uv_vis_plots.plot_uv_vis_and_pl(
         drop_columns=[0, 1, 2, 3],
         normalize=True,
         baseline=True,
         xlim=(300, 800),
+        ylim=(-0.1, 1.1),
+    )
+    uv_vis_plots.plot_uv_vis(
+        drop_columns=[0, 1, 2, 3],
+        normalize=True,
+        baseline=True,
+        xlim=(300, 800),
+        ylim=(-0.1, 1.1),
+    )
+    uv_vis_plots.plot_pl(
+        drop_columns=[0, 1, 2, 3],
+        normalize=True,
+        baseline=True,
+        xlim=(550, 800),
         ylim=(-0.1, 1.1),
     )
