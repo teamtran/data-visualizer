@@ -6,6 +6,7 @@ import numpy as np
 import scipy.signal
 import scipy.stats as stats
 import pandas as pd
+import plotly.express as px
 import json
 import os
 import scipy
@@ -57,7 +58,7 @@ class MALDIPlots:
         """
         # filter data by xlim
         ms_data = ms_data[(ms_data["m/z"] >= xlim[0]) & (ms_data["m/z"] <= xlim[1])]
-        print(ms_data)
+        # print(ms_data)
         if normalize:
             ms_data["Intensity"] = ms_data["Intensity"] / ms_data["Intensity"].max()
 
@@ -164,3 +165,33 @@ class MALDIPlots:
             self.result_dir / f"{self.result_name}maldi_zoom_{xlim[0]}-{xlim[1]}.svg",
             dpi=400,
         )
+
+    def plotly_maldi_zoom(
+        self,
+        xlim: tuple = (600, 6000),
+        ylim: tuple = (-0.1, 1),
+        peak_detection: bool = True,
+        normalize: bool = True,
+    ):
+        title: str = ""
+        ms_data_tidy_list = []
+        for ms_path, label, color in zip(self.ms_data_path, self.labels, self.colors):
+            # concatenate the data into tidy data format
+            title += label + "_"
+            ms_data = pd.read_csv(self.data_dir / ms_path, sep=" ", header=None)
+            ms_data = ms_data.rename(columns={0: "m/z", 1: "Intensity"})
+            ms_data = self.preprocess(ms_data, xlim=xlim, normalize=True)
+            ms_data["label"] = label
+            ms_data_tidy_list.append(ms_data)
+        # concatenate all dataframes
+        ms_data_tidy = pd.concat(ms_data_tidy_list)
+        fig = px.line(
+            ms_data_tidy,
+            x="m/z",
+            y="Intensity",
+            color="label",
+            title=title + "MALDI",
+        )
+        fig.update_layout(yaxis_range=[ylim[0], ylim[1]])
+        fig.update_layout(xaxis_range=[xlim[0], xlim[1]])
+        return fig

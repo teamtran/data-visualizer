@@ -21,20 +21,34 @@ plt.rcParams["axes.linewidth"] = style["axes_linewidth"]
 # TODO: Change experiment name and filenames
 # GPC Curves
 # Experiment Name
-experiment_name: str = "PS_Tosoh_Standards"
+experiment_name: str = "005f-A"
 
 # Result path
 result_path: Path = root_path / "results" / "MALDI" / experiment_name
+if not result_path.exists():
+    result_path.mkdir(parents=True)
 
 # Data directory path
 data_dir: Path = root_path / "data" / "MALDI" / experiment_name
 
 # Filenames
 maldi_filenames: list[str] = [
-    "2024_10_03_PS_Tosoh_F2_sum_0_G18_1.txt",
+    "2024_10_17_PS_Tosoh_F1_0_E5_1.txt",
+    # "2024_10_17_005f-A1_0_E11_1.txt",
+    "2024_10_17_005f-A2_0_E12_1.txt",
+    # "2024_10_17_005f-A3_0_E13_1.txt",
+    # "2024_10_17_PS_Tosoh_F2_0_E6_1.txt",
+    # "2024_10_17_PS_Tosoh_F4_0_E7_1.txt",
 ]
 
-labels: list = ["PS-F2-20K"]
+labels: list = [
+    "PS-F1-10K",
+    # "005f-A1",
+    "005f-A2",
+    # "005f-A3",
+    # "PS-F2-20K",
+    # "PS-F4-40K"
+]
 
 if __name__ == "__main__":
     maldi_plots = MALDIPlots(
@@ -45,6 +59,6 @@ if __name__ == "__main__":
         result_dir=result_path,
         style_path=style_path,
     )
-    # maldi_plots.plot_maldi(xlim=(25000, 50000))
+    maldi_plots.plot_maldi(xlim=(5000, 15000))
     # Trial and error with prominence to get the peaks that you want detected
-    maldi_plots.plot_maldi_zoom(xlim=(19500, 20000), prominence=0.05)
+    maldi_plots.plot_maldi_zoom(xlim=(9500, 10000), prominence=10)
