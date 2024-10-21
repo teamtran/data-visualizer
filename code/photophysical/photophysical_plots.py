@@ -55,6 +55,7 @@ class PhotophysicalPlots:
         self.result_name = ""
         for label in labels:
             self.result_name += label + "_"
+        # BIG TODO: Make sure to be able to handle plotting 1) uv-vis, 2) PL, and 3) uv-vis + pl
 
     def preprocess(
         self,
@@ -188,7 +189,7 @@ class PhotophysicalPlots:
             axis="both", which="major", labelsize=self.style["fontsize"], direction="in"
         )
         i = 0
-        # TODO: photoluminescence
+
         uv_vis_data, pl_data = self.preprocess(drop_columns, normalize, baseline, xlim)
 
         for uv_vis_expt_name, pl_expt_name, label, color in zip(

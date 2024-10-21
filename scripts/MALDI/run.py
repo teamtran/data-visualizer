@@ -31,10 +31,10 @@ data_dir: Path = root_path / "data" / "MALDI" / experiment_name
 
 # Filenames
 maldi_filenames: list[str] = [
-    "2024_10_03_PS_Tosoh_F4_sum_0_G19_1.txt",
+    "2024_10_03_PS_Tosoh_F2_sum_0_G18_1.txt",
 ]
 
-labels: list = ["PS-F4-40K"]
+labels: list = ["PS-F2-20K"]
 
 if __name__ == "__main__":
     maldi_plots = MALDIPlots(
@@ -45,6 +45,6 @@ if __name__ == "__main__":
         result_dir=result_path,
         style_path=style_path,
     )
-    maldi_plots.plot_maldi(xlim=(25000, 50000))
+    # maldi_plots.plot_maldi(xlim=(25000, 50000))
     # Trial and error with prominence to get the peaks that you want detected
-    # maldi_plots.plot_maldi_zoom(xlim=(9500, 10500), prominence=0.05)
+    maldi_plots.plot_maldi_zoom(xlim=(19500, 20000), prominence=0.05)
