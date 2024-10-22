@@ -181,6 +181,10 @@ class MALDIPlots:
             ms_data = pd.read_csv(self.data_dir / ms_path, sep=" ", header=None)
             ms_data = ms_data.rename(columns={0: "m/z", 1: "Intensity"})
             ms_data = self.preprocess(ms_data, xlim=xlim, normalize=True)
+            # Reduce amount of data to prevent lagging on plotly
+            print(len(ms_data))
+            ms_data = ms_data.iloc[::5, :]
+            print(len(ms_data))
             ms_data["label"] = label
             ms_data_tidy_list.append(ms_data)
         # concatenate all dataframes
