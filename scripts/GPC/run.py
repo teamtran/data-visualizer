@@ -33,34 +33,47 @@ data_dir: Path = root_path / "data" / "GPC" / experiment_name
 gpc_filenames: list[str] = [
     "2024_06_23_PS2439_6_1K.txt",
     "2024_06_23_005c-A-3.txt",
-    "2024_06_23_005c-B-2.txt",
     "2024_06_23_005c-C.txt",
     "2024_06_23_005c-E.txt",
+    "2024_06_23_005c-B-2.txt",
 ]
 
 labels: list = [
     "PS-6.1K",
-    "Water + O2",
-    "No Water + No O2",
-    "Water + No O2",
-    "No Water + O2",
+    r"Water + O${_2}$",
+    r"Water + no O${_2}$",
+    r"no Water + O${_2}$",
+    r"no Water + no O${_2}$",
 ]
 
-gpc_metadata: list = [
-    "Mn=5127, Mw=6706, D=1.308",
-    "Mn=5895, Mw=6927, D=1.175",
-    "Mn=6109, Mw=7537, D=1.234",
-    "Mn=5752, Mw=7277, D=1.265",
-    "Mn=5943, Mw=7565, D=1.273",
-]
+gpc_metadata: list = []
 
 if __name__ == "__main__":
     gpc_plots = GPCPlots(
         data_dir=data_dir,
         gpc_data_path=gpc_filenames,
         labels=labels,
-        colors=["#8286ff", "#00ff00", "#f5c92a", "#AF69EE", "#FFC0CB"],
+        colors=[
+            "#8286ff",
+            "#2166ac",
+            "#a50026",
+            "#d73027",
+            "#f46d43",
+            "#fdae61",
+            "#fee08b",
+            "#d9ef8b",
+            "#a6d96a",
+            "#66bd63",
+            "#1a9850",
+            "#006837",
+        ],
         result_dir=result_path,
         style_path=style_path,
     )
-    gpc_plots.plot_gpc(gpc_metadata=gpc_metadata, xlim=(6.5, 9.5), ylim=(-0.1, 1.1))
+    gpc_plots.plot_gpc(
+        gpc_metadata=gpc_metadata,
+        xlim=(6.5, 8.5),
+        ylim=(-0.1, 1.1),
+        inset_xlim=(7.62, 7.8),
+        rt=7.25,
+    )
