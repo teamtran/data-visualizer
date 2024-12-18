@@ -48,6 +48,7 @@ class GCMSPlots:
     def preprocess(self, gcms_data: pd.DataFrame) -> pd.DataFrame:
         """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to gcms."""
         # Normalize data
+        print(f"{gcms_data[gcms_data.columns[2]]=}")
         gcms_data[gcms_data.columns[2]] = (
             gcms_data[gcms_data.columns[2]] / gcms_data[gcms_data.columns[2]].max()
         )
@@ -64,9 +65,8 @@ class GCMSPlots:
 
     def plot_gcms(
         self,
-        gcms_metadata: list[str],
         xlim: tuple,
-        ylim: tuple = (-0.1, 1),
+        ylim: tuple = (-0.05, 1),
     ):
         """
         Function that plots gcms data.
@@ -75,23 +75,29 @@ class GCMSPlots:
         plt.tight_layout(pad=3)
         # aesthetics
         ax.set_xlabel("Retention Time (min)", fontsize=12)
-        ax.set_ylabel(f"Normalized Intensity at lambda={nm}nm", fontsize=12)
+        ax.set_ylabel(f"Normalized Intensity of Ion Count", fontsize=12)
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
         ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
         for gcms_file, label, color in zip(
             self.gcms_data_path, self.labels, self.colors
         ):
+            # remove commas from text file
+            with open(self.data_dir / gcms_file, "r") as f:
+                lines = f.readlines()
+            with open(self.data_dir / gcms_file, "w") as f:
+                for line in lines:
+                    f.write(line.replace(",", ""))
             gcms_data = pd.read_csv(self.data_dir / gcms_file, skiprows=42, sep="\t")
+            gcms_data.dropna(inplace=True)
             gcms_data = self.preprocess(gcms_data)  # normalize data
             ax.plot(
                 gcms_data[gcms_data.columns[0]],
-                gcms_data[gcms_data.columns[1]],
+                gcms_data[gcms_data.columns[2]],
                 label=label,
                 color=color,
-                linewidth=0.2,
+                linewidth=1,
             )
-            i += 1
         legend = ax.legend(
             loc="upper right",
             frameon=False,
@@ -111,7 +117,7 @@ class MSPlots:
     def __init__(
         self,
         data_dir: Path,
-        ms_data_path: list[Path],
+        ms_data_path: str,
         result_dir: Path,
         style_path: Path,
     ):
@@ -150,7 +156,12 @@ class MSPlots:
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
         ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
-
+        # remove commas from text file
+        with open(self.data_dir / self.ms_data_path, "r") as f:
+            lines = f.readlines()
+        with open(self.data_dir / self.ms_data_path, "w") as f:
+            for line in lines:
+                f.write(line.replace(",", ""))
         gcms_data = pd.read_csv(
             self.data_dir / self.ms_data_path, skiprows=35, sep="\t"
         )
