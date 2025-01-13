@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib
 import numpy as np
+import scipy
 import scipy.stats as stats
 import pandas as pd
 import json
@@ -120,6 +121,7 @@ class MSPlots:
         ms_data_path: str,
         result_dir: Path,
         style_path: Path,
+        label: str,
     ):
         """
         Initialize the class with the data path and the result directory.
@@ -130,9 +132,16 @@ class MSPlots:
         self.style_path = style_path
         self.style = json.load(open(style_path))
         self.result_name = ""
+        self.result_name += label + "_"
 
-    def preprocess(self, ms_data: pd.DataFrame) -> pd.DataFrame:
+    def preprocess(self, ms_data: pd.DataFrame, xlim: tuple) -> pd.DataFrame:
         """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to gcms."""
+        # filter data by xlim
+        ms_data = ms_data[
+            (ms_data[ms_data.columns[0]] >= xlim[0])
+            & (ms_data[ms_data.columns[0]] <= xlim[1])
+        ]
+
         # Normalize data
         ms_data[ms_data.columns[1]] = (
             ms_data[ms_data.columns[1]] / ms_data[ms_data.columns[1]].max()
@@ -144,6 +153,7 @@ class MSPlots:
         time: float,
         xlim: tuple,
         ylim: tuple = (-0.1, 1),
+        prominence: float = 0.002,
     ):
         """
         Function that plots gcms data.
@@ -165,18 +175,85 @@ class MSPlots:
         gcms_data = pd.read_csv(
             self.data_dir / self.ms_data_path, skiprows=35, sep="\t"
         )
-        gcms_data = self.preprocess(gcms_data)  # normalize data
-        ax.plot(
+        gcms_data = self.preprocess(gcms_data, xlim)  # normalize data
+        ax.stem(
             gcms_data[gcms_data.columns[0]],
             gcms_data[gcms_data.columns[1]],
-            linewidth=0.2,
+            markerfmt=" ",
+            basefmt=" ",
         )
+        # label peaks higher than 0.02
+        peak_idx, properties = scipy.signal.find_peaks(
+            gcms_data[gcms_data.columns[1]], prominence=prominence
+        )
+        for i, peak in enumerate(peak_idx):
+            ax.text(
+                gcms_data.iloc[peak][gcms_data.columns[0]],
+                gcms_data.iloc[peak][gcms_data.columns[1]] + 0.02,
+                f"{gcms_data.iloc[peak][gcms_data.columns[0]]:.2f}",
+                fontsize=8,
+            )
 
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
         time = str(time).replace(".", "_")
         plt.savefig(
             self.result_dir / f"{self.result_name}ms_spectrum_at_{time}min.png",
+            dpi=600,
+        )
+
+    def plot_ms_zoom(
+        self,
+        time: float,
+        xlim: tuple,
+        ylim: tuple = (-0.1, 1),
+        prominence: float = 0.002,
+    ):
+        """
+        Function that plots gcms data.
+        """
+        fig, ax = plt.subplots(figsize=(7, 5))
+        plt.tight_layout(pad=3)
+        # aesthetics
+        ax.set_xlabel("Charge to mass ratio (m/z)", fontsize=12)
+        ax.set_ylabel(f"Normalized Ion Intensity at {time}min", fontsize=12)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
+        # remove commas from text file
+        with open(self.data_dir / self.ms_data_path, "r") as f:
+            lines = f.readlines()
+        with open(self.data_dir / self.ms_data_path, "w") as f:
+            for line in lines:
+                f.write(line.replace(",", ""))
+        gcms_data = pd.read_csv(
+            self.data_dir / self.ms_data_path, skiprows=35, sep="\t"
+        )
+        gcms_data = self.preprocess(gcms_data, xlim)  # normalize data
+        ax.stem(
+            gcms_data[gcms_data.columns[0]],
+            gcms_data[gcms_data.columns[1]],
+            markerfmt=" ",
+            basefmt=" ",
+        )
+        # label peaks higher than 0.02
+        peak_idx, properties = scipy.signal.find_peaks(
+            gcms_data[gcms_data.columns[1]], prominence=prominence
+        )
+        for i, peak in enumerate(peak_idx):
+            ax.text(
+                gcms_data.iloc[peak][gcms_data.columns[0]],
+                gcms_data.iloc[peak][gcms_data.columns[1]] + 0.02,
+                f"{gcms_data.iloc[peak][gcms_data.columns[0]]:.2f}",
+                fontsize=8,
+            )
+
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+        time = str(time).replace(".", "_")
+        plt.savefig(
+            self.result_dir
+            / f"{self.result_name}ms_spectrum_at_{time}min_{xlim[0]}_{xlim[1]}m_z_zoom.png",
             dpi=600,
         )
 

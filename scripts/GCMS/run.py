@@ -38,15 +38,23 @@ gcms_lin_cal_filename: str = "isopropylbenzene-SCF3-linear-calibration.csv"
 #     "2024_12_16_005c-H1F_XIC_366.txt",
 # ]
 gcms_filename: list[str] = [
-    "2024_12_16_005c-H3F_TIC.txt",
-    "2024_12_16_005c-H3F_XIC_266.txt",
-    "2024_12_16_005c-H3F_XIC_364.txt",
-    "2024_12_16_005c-H3F_XIC_366.txt",
+    # "2024_12_16_005c-H3F_TIC.txt",
+    # "2024_12_16_005c-H3F_XIC_266.txt",
+    # "2024_12_16_005c-H3F_XIC_364.txt",
+    # "2024_12_16_005c-H3F_XIC_366.txt",
+    "2024_12_16_PS_Dimer_TIC.txt",
+    "2024_12_16_PS_Dimer_XIC_266.txt",
+    "2024_12_16_PS_Dimer_XIC_364.txt",
+    "2024_12_16_PS_Dimer_XIC_366.txt",
 ]
-ms_filename: str = "2024_12_16_005c-H1F_t_3_8m.txt"
+# ms_filename: str = "2024_12_16_005c-H1F_t_3_8m.txt"  # "2024_12_16_005c-H1F_t_4_0m.txt"
+ms_filename: str = "2024_12_16_005c-H3F_t_3_8m.txt"
 # label = "Isopropylbenzene-SCF3"
 # labels = ["005c-H1F", "005c-H1F_XIC_266", "005c-H1F_XIC_364", "005c-H1F_XIC_366 "]
-labels = ["005c-H3F", "005c-H3F_XIC_266", "005c-H3F_XIC_364", "005c-H3F_XIC_366 "]
+# labels = ["005c-H3F", "005c-H3F_XIC_266", "005c-H3F_XIC_364", "005c-H3F_XIC_366"]
+labels = ["PS_Dimer", "PS_Dimer_XIC_266", "PS_Dimer_XIC_364", "PS_Dimer_XIC_366"]
+label = "005c-H3F"  # PS_Dimer # 005c-H3F
+time_label = 3.8
 if __name__ == "__main__":
     # gcms_linear_cal_plot = GCMS_LinearCalibration_Plots(
     #     data_dir=data_dir,
@@ -58,20 +66,22 @@ if __name__ == "__main__":
     #     nm=230,
     # )
     # gcms_linear_cal_plot.plot_calibration_curve()
-    # gcms_plots = GCMSPlots(
-    #     data_dir=data_dir,
-    #     gcms_data_path=gcms_filename,
-    #     result_dir=result_path,
-    #     style_path=style_path,
-    #     gcms_type="TIC",
-    #     labels=labels,
-    #     colors=["#8286ff", "#00ff00", "#f5c92a", "#AF69EE", "#FFC0CB"],
-    # )
-    # gcms_plots.plot_gcms(xlim=(2.5, 7))
-    ms_plots = MSPlots(
+    gcms_plots = GCMSPlots(
         data_dir=data_dir,
-        ms_data_path=ms_filename,
+        gcms_data_path=gcms_filename,
         result_dir=result_path,
         style_path=style_path,
+        gcms_type="TIC",
+        labels=labels,
+        colors=["#8286ff", "#00ff00", "#f5c92a", "#AF69EE", "#FFC0CB"],
     )
-    ms_plots.plot_ms(time=3.8, xlim=(150, 400))
+    gcms_plots.plot_gcms(xlim=(2.5, 7))
+    # ms_plots = MSPlots(
+    #     data_dir=data_dir,
+    #     ms_data_path=ms_filename,
+    #     result_dir=result_path,
+    #     style_path=style_path,
+    #     label=label,
+    # )
+    # ms_plots.plot_ms(time=time_label, xlim=(150, 400))
+    # ms_plots.plot_ms_zoom(time=time_label, xlim=(300, 400))
