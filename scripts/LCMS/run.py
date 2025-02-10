@@ -32,7 +32,7 @@ data_dir: Path = root_path / "data" / "LCMS" / experiment_name
 # Filenames
 lcms_filename: str = "isopropylbenzene-SCF3-linear-calibration.csv"
 
-label = "Isopropylbenzene-SCF3"
+label = "Isopropylbenzene-SCF$_3$-Bpin"
 
 if __name__ == "__main__":
     lcms_linear_cal_plot = LCMS_LinearCalibration_Plots(

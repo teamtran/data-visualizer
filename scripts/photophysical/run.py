@@ -21,7 +21,7 @@ plt.rcParams["axes.linewidth"] = style["axes_linewidth"]
 # TODO: Change experiment name and filenames
 # uv_vis Curves
 # Experiment Name
-experiment_name: str = "AL_1_45"
+experiment_name: str = "005d-B"
 
 # Result path
 result_path: Path = root_path / "results" / "photophysical" / experiment_name
@@ -30,22 +30,34 @@ result_path: Path = root_path / "results" / "photophysical" / experiment_name
 data_dir: Path = root_path / "data" / "photophysical" / experiment_name
 
 # Filenames
-uv_vis_filename: str = "AL_1_45_D_E_F.xlsx"
-photoluminescence_filename: str = "AL_1_45_D_PL.xlsx"
+uv_vis_filename: str = "2024_12_18_005d-B1_purification.csv"
+photoluminescence_filename: str = (
+    "2025_01_30_005d-B1-purification-photoluminescence.xlsx"
+)
 
 uv_vis_experiment_names: list[str] = [
-    "AL_1_45D_0.05mgml_water",
-    "AL_1_45E_0.1mgml_water",
-    "AL_1_45F_0.1mgml_water",
+    "0.05mg_mL_4CzIPN",
+    "0.965mg_mL_PS_6_1K",
+    "1.09mg_mL_005d-B1-FLASH",
+    "0.985mg_mL_005d-B1-rGPC",
+    "0.95mg_mL_005d-B1-toyopearls",
 ]
 photoluminescence_experiment_names: list[str] = [
-    "Emission AL-1-35L low",
-    "Emission AL-1-35L med",
-    "Emission AL-1-35L high",
+    "0.05mg_mL_4CzIPN",
+    "0.965mg_mL_PS_6_1K",
+    "1.09mg_mL_005d-B1-FLASH",
+    "0.985mg_mL_005d-B1-rGPC",
+    "0.95mg_mL_005d-B1-toyopearls",
 ]
 
-labels: list = ["AL_1_45_D", "AL_1_45_E", "AL_1_45_F"]
-colors = ["blue", "green", "yellow"]
+labels: list = [
+    "4CzIPN",
+    "PS_6.4K",
+    "PS-SCF3-FLASH",
+    "PS-SCF3-rGPC",
+    "PS-SCF3-Toyopearls",
+]
+colors = ["yellow", "blue", "dark_yellow", "green_blue_3", "green_blue_5"]
 
 if __name__ == "__main__":
     uv_vis_plots = PhotophysicalPlots(
@@ -77,6 +89,6 @@ if __name__ == "__main__":
         drop_columns=[0, 1, 2, 3],
         normalize=True,
         baseline=True,
-        xlim=(550, 800),
+        xlim=(365, 700),
         ylim=(-0.1, 1.1),
     )

@@ -104,7 +104,7 @@ class GPCPlots:
                 gpc_data[gpc_data.columns[1]],
                 label=label,
                 color=color,
-                linewidth=0.2,
+                linewidth=0.8,
             )
             i += 1
             if inset_xlim is not None:
@@ -118,7 +118,7 @@ class GPCPlots:
                     gpc_data[gpc_data.columns[0]][start_idx:end_idx],
                     gpc_data[gpc_data.columns[1]][start_idx:end_idx],
                     color=color,
-                    linewidth=0.2,
+                    linewidth=0.4,
                 )  # Plot the zoomed in area restricted to the start_idx
 
         if inset_xlim is not None:

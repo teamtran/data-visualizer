@@ -45,7 +45,12 @@ isothermal_ms_filenames: list = [
 
 
 # labels: list = ["PS-SCF3-1K_min", "PS-6.1K-1K_min"]
-labels: list = ["PS-6.1K", "PS-SCF3-FLASH", "PS-SCF3-rGPC", "PS-SCF3-Toyopearls"]
+labels: list = [
+    "PS-6_4K",
+    "PS-SCF$_3$-FLASH",
+    "PS-SCF$_3$-rGPC",
+    "PS-SCF$_3$-Toyopearls",
+]
 # labels: list = ["PS-SCF3-0_1K_min", "PS-6_1K-0_1K_min"]
 
 if __name__ == "__main__":
@@ -61,7 +66,7 @@ if __name__ == "__main__":
     # TODO: must change temp and xlimit depending on the isothermal conditions!
     isothermal_tga_plots.plot_tga_isothermal(
         isothermal_temp=300,
-        xlim=(0, 1450),
+        xlim=(0, 1250),
         ylim=(0, 110),
         target_mass=104,
         initial_correction_time=50,

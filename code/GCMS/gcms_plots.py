@@ -48,6 +48,11 @@ class GCMSPlots:
 
     def preprocess(self, gcms_data: pd.DataFrame) -> pd.DataFrame:
         """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to gcms."""
+        # Baseline correction according to initial 50 datapoints
+        gcms_data[gcms_data.columns[2]] = (
+            gcms_data[gcms_data.columns[2]]
+            - gcms_data[gcms_data.columns[2]].iloc[:50].mean()
+        )
         # Normalize data
         print(f"{gcms_data[gcms_data.columns[2]]=}")
         gcms_data[gcms_data.columns[2]] = (
@@ -153,7 +158,8 @@ class MSPlots:
         time: float,
         xlim: tuple,
         ylim: tuple = (-0.1, 1),
-        prominence: float = 0.002,
+        prominence: float = 0.01,
+        inset_xlim: tuple = (340, 380),
     ):
         """
         Function that plots gcms data.
@@ -187,12 +193,60 @@ class MSPlots:
             gcms_data[gcms_data.columns[1]], prominence=prominence
         )
         for i, peak in enumerate(peak_idx):
+            # Write text rotated 45 degrees.
+
             ax.text(
                 gcms_data.iloc[peak][gcms_data.columns[0]],
                 gcms_data.iloc[peak][gcms_data.columns[1]] + 0.02,
                 f"{gcms_data.iloc[peak][gcms_data.columns[0]]:.2f}",
                 fontsize=8,
+                rotation=30,
             )
+
+        # Define the "zoomed in" area
+        if inset_xlim is not None:
+            axins = ax.inset_axes(
+                [0.6, 0.4, 0.4, 0.3]
+            )  # [x, y, width, height] of inset axis
+            axins.spines["top"].set_visible(False)
+            axins.spines["right"].set_visible(False)
+            axins.tick_params(axis="both", which="major", labelsize=8, direction="in")
+            start_idx = gcms_data[
+                gcms_data[gcms_data.columns[0]] >= inset_xlim[0]
+            ].index[0]
+            end_idx = gcms_data[gcms_data[gcms_data.columns[0]] >= inset_xlim[1]].index[
+                0
+            ]
+            axins.stem(
+                gcms_data[gcms_data.columns[0]][start_idx:end_idx],
+                gcms_data[gcms_data.columns[1]][start_idx:end_idx],
+                markerfmt=" ",
+                basefmt=" ",
+            )  # Plot the zoomed in area restricted to the start_idx
+            # label peaks higher than 0.02
+            peak_idx, properties = scipy.signal.find_peaks(
+                gcms_data[gcms_data.columns[1]][start_idx:end_idx],
+                prominence=0.000001,
+            )
+            print(f"{peak_idx=}")
+            for i, peak in enumerate(peak_idx):
+                # Write text rotated 45 degrees.
+                axins.text(
+                    gcms_data[gcms_data.columns[0]][start_idx:end_idx].iloc[peak],
+                    gcms_data[gcms_data.columns[1]][start_idx:end_idx].iloc[peak]
+                    + 0.0005,
+                    f"{gcms_data[gcms_data.columns[0]][start_idx:end_idx].iloc[peak]:.2f}",
+                    fontsize=8,
+                    rotation=30,
+                )
+            # Set the limits of the zoomed in area
+            box, c1 = ax.indicate_inset_zoom(axins, lw=0.4, edgecolor="black", alpha=1)
+            c1[0].set_visible(True)
+            c1[1].set_visible(True)
+            c1[2].set_visible(True)
+            c1[3].set_visible(True)
+            box.set(linewidth=0.4, alpha=0.8)
+            plt.setp([c1[:]], linestyle=":", lw=0.5)
 
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
@@ -246,6 +300,7 @@ class MSPlots:
                 gcms_data.iloc[peak][gcms_data.columns[1]] + 0.02,
                 f"{gcms_data.iloc[peak][gcms_data.columns[0]]:.2f}",
                 fontsize=8,
+                rotation=30,
             )
 
         ax.set_xlim(xlim)

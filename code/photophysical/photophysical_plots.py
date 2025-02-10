@@ -67,17 +67,17 @@ class PhotophysicalPlots:
         """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to photophysical."""
         if self.uv_vis:
             # Get all index of columns
-            temp_data = pd.read_excel(self.uv_vis_data_path)
+            temp_data = pd.read_csv(self.uv_vis_data_path)
             columns = range(0, len(temp_data.columns))
             # Drop columns
             use_columns = [x for x in columns if x not in drop_columns]
             # Drop all rows after the data (i.e. drop the metadata)
-            # Find row all NaNs
-            row_to_drop = temp_data[temp_data.isnull().all(axis=1)].index[0]
+            # Find row with "Baseline 100%T"
+            row_to_drop = temp_data[temp_data.iloc[:, 0] == "Baseline 100%T"].index[0]
             num_of_rows = len(temp_data.index)
             skiprows = list(range(row_to_drop, num_of_rows + 1))
             skiprows.append(1)  # skip row with wavelength and absorbance
-            uv_vis_data = pd.read_excel(
+            uv_vis_data = pd.read_csv(
                 self.uv_vis_data_path, usecols=use_columns, skiprows=skiprows
             )
             # cut off data according to xlim
