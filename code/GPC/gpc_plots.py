@@ -6,7 +6,6 @@ import scipy.stats as stats
 import pandas as pd
 import json
 import os
-import plotly.express as px
 from pathlib import Path
 from matplotlib.ticker import MultipleLocator, AutoMinorLocator
 from sklearn.metrics import r2_score
@@ -43,14 +42,20 @@ class GPCPlots:
         for label in labels:
             self.result_name += label + "_"
 
-    def preprocess(
-        self, gpc_data: pd.DataFrame, normalize_space: np.array, i: int
-    ) -> pd.DataFrame:
+    def preprocess(self, gpc_data: pd.DataFrame, xlim: tuple, i: int) -> pd.DataFrame:
         """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to GPC."""
         # Normalize data
+        # Get idx where the retention time is greater than xlim[0] and less than xlim[1]
+        xlim_idx_0 = gpc_data[gpc_data.columns[0]][
+            gpc_data[gpc_data.columns[0]] > xlim[0]
+        ].idxmin()
+        xlim_idx_1 = gpc_data[gpc_data.columns[0]][
+            gpc_data[gpc_data.columns[0]] < xlim[1]
+        ].idxmax()
         gpc_data[gpc_data.columns[1]] = (
-            gpc_data[gpc_data.columns[1]] / gpc_data[gpc_data.columns[1]].max()
-        ) * normalize_space[i]
+            gpc_data[gpc_data.columns[1]]
+            / gpc_data[gpc_data.columns[1]][xlim_idx_0:xlim_idx_1].max()
+        )
         return gpc_data
 
     def intensity_at_rt(self, gpc_data: pd.DataFrame, rt: float) -> float:
@@ -81,12 +86,7 @@ class GPCPlots:
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
         ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
-        # Incrementally normalize the data to a lower point
-        normalize_upper_limit = 1
-        normalize_lower_limit = 1
-        normalize_space = np.linspace(
-            normalize_upper_limit, normalize_lower_limit, len(self.gpc_data_path)
-        )
+
         i = 0
         # Define the "zoomed in" area
         if inset_xlim is not None:
@@ -97,14 +97,14 @@ class GPCPlots:
         intensity_at_rt = {}
         for gpc_file, label, color in zip(self.gpc_data_path, self.labels, self.colors):
             gpc_data = pd.read_csv(self.data_dir / gpc_file, skiprows=1, sep="\t")
-            gpc_data = self.preprocess(gpc_data, normalize_space, i)  # normalize data
+            gpc_data = self.preprocess(gpc_data, xlim, i)  # normalize data
             intensity_at_rt[label] = self.intensity_at_rt(gpc_data, rt)
             ax.plot(
                 gpc_data[gpc_data.columns[0]],
                 gpc_data[gpc_data.columns[1]],
                 label=label,
                 color=color,
-                linewidth=0.8,
+                linewidth=1.2,
             )
             i += 1
             if inset_xlim is not None:
@@ -152,6 +152,7 @@ class GPCPlots:
             )
         ax.add_artist(legend)
         plt.savefig(self.result_dir / f"{self.result_name}gpc_plot.png", dpi=600)
+        plt.savefig(self.result_dir / f"{self.result_name}gpc_plot.svg", dpi=600)
 
         # Save intensiy data
         intensity_at_rt_df = pd.DataFrame.from_dict(intensity_at_rt, orient="index")

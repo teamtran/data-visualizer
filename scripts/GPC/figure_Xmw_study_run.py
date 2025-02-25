@@ -25,6 +25,8 @@ experiment_name: str = "005d-L_M"
 
 # Result path
 result_path: Path = root_path / "results" / "GPC" / experiment_name
+if not result_path.exists():
+    result_path.mkdir(parents=True)
 
 # Data directory path
 data_dir: Path = root_path / "data" / "GPC" / experiment_name
@@ -43,6 +45,11 @@ gpc_filenames: list[str] = [
     "2025_02_11_005d-L2.txt",
     "2025_02_11_005d-L3.txt",
     "2025_02_11_005d-L4.txt",
+    #     "2025_02_13_005d-M1-crude.txt",
+    #     "2025_02_13_005d-L1-crude.txt",
+    #     "2025_02_13_005d-L2-crude.txt",
+    #     "2025_02_13_005d-L3-crude.txt",
+    #     "2025_02_13_005d-L4-crude.txt",
 ]
 
 labels: list = [
@@ -56,6 +63,11 @@ labels: list = [
     "PS-19.6K-SCF3",
     "PS-40.4K-SCF3",
     "PS-110K-SCF3",
+    # "PS-1.1K-SCF3-crude",
+    # "PS-10K-SCF3-crude",
+    # "PS-19.6K-SCF3-crude",
+    # "PS-40.4K-SCF3-crude",
+    # "PS-110K-SCF3-crude",
 ]
 
 gpc_metadata: list = [
@@ -71,21 +83,44 @@ gpc_metadata: list = [
     "Mn=17.2k, Mw=18.4k, Mp=19.6k",  # PS-19.6K-SCF3
     "Mn=33.8k, Mw=36.8k, Mp=40.7k",  # PS-40.4K-SCF3
     "Mn=84.9k, Mw=100k, Mp=109k",  # PS-110K-SCF3
+    # "Mn=0.9k, Mw=1.1k, Mp=1.0k",  # PS-1.1K-SCF3
+    # "Mn=8.5k, Mw=9.2k, Mp=9.8k",  # PS-10K-SCF3
+    # "Mn=16.6k, Mw=17.9k, Mp=19.4k",  # PS-19.6K-SCF3
+    # "Mn=34.0k, Mw=36.7k, Mp=40.4k",  # PS-40.4K-SCF3
+    # "Mn=91.8k, Mw=98.4k, Mp=104.7k",  # PS-110K-SCF3
 ]
 
+colors: list = [
+    "#d9d9d9",
+    "#bdbdbd",
+    "#969696",
+    "#636363",
+    "#252525",
+    "#a6bddb",
+    "#74a9cf",
+    "#3690c0",
+    "#0570b0",
+    "#045a8d",
+]
+
+xlims: list = [(7.7, 9.7), (6.7, 8.3), (6.4, 8.0), (5.9, 7.6), (5.0, 7.5)]
+
+inset_xlims: list = [(8.7, 9.1), (7.5, 7.7), (7.2, 7.35), (6.8, 6.9), (6.2, 6.45)]
+
 if __name__ == "__main__":
-    gpc_plots = GPCPlots(
-        data_dir=data_dir,
-        gpc_data_path=gpc_filenames,
-        labels=labels,
-        colors=["#8286ff", "#f5c92a", "#e0f3db", "#7bccc4"],
-        result_dir=result_path,
-        style_path=style_path,
-    )
-    gpc_plots.plot_gpc(
-        gpc_metadata=gpc_metadata,
-        xlim=(6.75, 8.5),
-        ylim=(-0.1, 1.1),
-        inset_xlim=(7.65, 7.82),
-        rt=7.25,
-    )
+    for i in range(len(gpc_filenames) - 5):
+        gpc_plots = GPCPlots(
+            data_dir=data_dir,
+            gpc_data_path=[gpc_filenames[i], gpc_filenames[i + 5]],
+            labels=[labels[i], labels[i + 5]],
+            colors=[colors[i], colors[i + 5]],
+            result_dir=result_path,
+            style_path=style_path,
+        )
+        gpc_plots.plot_gpc(
+            gpc_metadata=[gpc_metadata[i], gpc_metadata[i + 5]],
+            xlim=xlims[i],
+            ylim=(-0.1, 1.1),
+            inset_xlim=None,
+            rt=7.25,
+        )

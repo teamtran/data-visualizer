@@ -92,7 +92,9 @@ if __name__ == "__main__":
             plot.plot_up_saturation_regime(max_x_range=-40, min_x_range=-60)
             plot.plot_down_saturation_regime(max_x_range=-40, min_x_range=-60)
             # Export metadata (must plot saturation regime curves first)
-            plot.export_metadata(on_GateV=-60, off_GateV=-40)
+            plot.export_metadata(
+                on_GateV=-60, off_GateV=-40
+            )  # Ion/Ioff set here on-Gate is top most of the curve and off_Gate is the plateau to the right of the lowest point of the V
 
     # Output Curves
     for data_filename in output_curve_data_filenames.keys():

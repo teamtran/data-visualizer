@@ -56,27 +56,25 @@ class TGAPlots:
         tga_data: pd.DataFrame,
         ms_data: pd.DataFrame,
         initial_correction: float,
-        initial_mass: float,
         time_or_temp: str = "Time",
     ) -> pd.DataFrame:
         """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to TGA-MS."""
         # Truncate Temp./C column to Temp
         tga_data.columns = tga_data.columns.str.replace(tga_data.columns[0], "Temp")
+        tga_data.columns = tga_data.columns.str.replace(
+            tga_data.columns[3], "Mass loss/pct"
+        )
         # Truncate Temp./C column to Temp in ms_raw_data
         ms_data.columns = ms_data.columns.str.replace(ms_data.columns[0], "Temp")
 
         # Account for uncertainty: balance drift (0.002mg/hr); balance uncertainty (2.5e-5mg)
-        tga_data["mass_loss_uncertainty"] = (
-            tga_data["Time/min"] * (0.002 / 60) + 0.000025
-        )
-        # Convert masses to pct
-        tga_data["Mass loss/pct"] = (
-            (initial_mass + tga_data["Mass loss/mg"]) * 100
-        ) / initial_mass
+        # tga_data["mass_loss_uncertainty"] = (
+        #     tga_data["Time/min"] * (0.002 / 60) + 0.000025
+        # )
 
-        tga_data["mass_loss_pct_uncertainty"] = (
-            tga_data["mass_loss_uncertainty"] * 100 / initial_mass
-        )
+        # tga_data["mass_loss_pct_uncertainty"] = (
+        #     tga_data["mass_loss_uncertainty"] * 100 / initial_mass
+        # )
 
         # find the row closest to the initial_correction_time for tga_data
         if time_or_temp == "Time":
@@ -123,7 +121,7 @@ class TGAPlots:
         xlim: tuple = (0, 1450),
         ylim: tuple = (0, 100),
         initial_correction_time: int = 50,
-        uncertainty: bool = True,
+        uncertainty: bool = False,
         time_for_mass_difference: float = 1450,
     ):
         """
@@ -267,7 +265,7 @@ class TGAPlots:
                 tga_data, ms_data, initial_correction_temp, "Temp"
             )
             ax[0].plot(
-                tga_data["Temp"], tga_data["Mass loss/mg"], label=label, color=color
+                tga_data["Temp"], tga_data["Mass loss/pct"], label=label, color=color
             )
             ax[1].plot(
                 ms_data["Temp"],
