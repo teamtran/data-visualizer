@@ -31,7 +31,7 @@ data_dir: Path = root_path / "data" / "TGA" / experiment_name
 
 # Filenames
 isothermal_filenames: list = [
-    "styrofoam.txt",
+    "styrofoam-corrected.txt",
     "M2.txt",
 ]
 isothermal_ms_filenames: list = [

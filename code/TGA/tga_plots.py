@@ -264,6 +264,17 @@ class TGAPlots:
             tga_data, ms_data = self.preprocess(
                 tga_data, ms_data, initial_correction_temp, "Temp"
             )
+            # find the index at which the mass loss is closest to the t_depolymerization_cutoff
+            t_depolymerization_temp = (
+                tga_data["Temp"]
+                .iloc[
+                    (tga_data["Mass loss/pct"] - t_depolymerization_cutoff)
+                    .abs()
+                    .argsort()[:1]
+                ]
+                .values[0]
+            )
+            print(f"{label}: {t_depolymerization_temp}")
             ax[0].plot(
                 tga_data["Temp"], tga_data["Mass loss/pct"], label=label, color=color
             )
@@ -283,6 +294,7 @@ class TGAPlots:
             label="$T_\mathregular{depolymerization}$"
             + f" at {t_depolymerization_cutoff}% Mass",
         )
+
         ax[0].legend()
         ax[1].legend()
         ax[0].set_xlim(xlim)

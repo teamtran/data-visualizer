@@ -1,7 +1,7 @@
 Filename	L2
 Instrument name	
 Operator	Galyna
-rundate	2025-02-24
+-correctrundate	2025-02-24
 Sample name	L2
 [step]
 Step 1

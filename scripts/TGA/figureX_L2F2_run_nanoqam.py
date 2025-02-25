@@ -32,7 +32,7 @@ data_dir: Path = root_path / "data" / "TGA" / experiment_name
 # Filenames
 isothermal_filenames: list = [
     "F2.txt",
-    "L2.txt",
+    "L2-corrected.txt",
 ]
 isothermal_ms_filenames: list = [
     "F2_000002 -temp.txt",

@@ -30,16 +30,16 @@ result_path: Path = root_path / "results" / "TGA" / experiment_name
 data_dir: Path = root_path / "data" / "TGA" / experiment_name
 
 # Filenames
-isothermal_filenames: list = ["F1.txt", "L1.txt", "005h-A3.txt"]
+isothermal_filenames: list = ["F1.txt", "L1.txt"]
 isothermal_ms_filenames: list = [
     "F1_000001 -temp.txt",
     "L1_000001 -temp.txt",
-    "005h-A3-temp.txt",
+    # "005h-A3-temp.∂txt",
 ]
 
 
 # labels: list = ["PS-SCF3-1K_min", "PS-6.1K-1K_min"]
-labels: list = ["PS-10K", "PS-10K-SCF3", "PS-10K-control"]
+labels: list = ["PS-10K", "PS-10K-SCF3"]
 colors: list = [
     style["color"][labels[0]],
     style["color"][labels[1]],
