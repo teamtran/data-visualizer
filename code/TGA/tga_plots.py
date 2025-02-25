@@ -233,10 +233,10 @@ class TGAPlots:
         fig, ax = plt.subplots(2, figsize=(6, 6))
         plt.subplots_adjust(hspace=0.5)
         # aesthetics
-        ax[0].set_xlabel("Temp (oC)", fontsize=12)
+        ax[0].set_xlabel("Temp ($^{o}$C)", fontsize=12)
         ax[0].set_ylabel("Mass (%)", fontsize=12)
         ax[0].set_title(f"Dynamic TGA")
-        ax[1].set_xlabel("Temp (oC)", fontsize=12)
+        ax[1].set_xlabel("Temp ($^{o}$C)", fontsize=12)
         ax[1].set_ylabel("Ion Current (A)", fontsize=12)
         ax[1].set_title(f"{target_mass} m/z for Dynamic TGA")
         ax[0].spines["top"].set_visible(False)

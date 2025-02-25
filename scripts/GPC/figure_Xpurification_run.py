@@ -41,9 +41,9 @@ gpc_filenames: list[str] = [
 
 labels: list = [
     "PS-6.4K",
-    "PS-SCF3-FLASH",
-    "PS-SCF3-rGPC",
-    "PS-SCF3-Toyopearls",
+    "PS-SCF$_{3}$-FLASH",
+    "PS-SCF$_{3}$-rGPC",
+    "PS-SCF$_{3}$-Toyopearls",
 ]
 
 gpc_metadata: list = [

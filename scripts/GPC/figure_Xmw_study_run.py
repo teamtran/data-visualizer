@@ -58,11 +58,11 @@ labels: list = [
     "PS-19.6K",
     "PS-40.4K",
     "PS-110K",
-    "PS-1.1K-SCF3",
-    "PS-10K-SCF3",
-    "PS-19.6K-SCF3",
-    "PS-40.4K-SCF3",
-    "PS-110K-SCF3",
+    "PS-1.1K-SCF$_{3}$",
+    "PS-10K-SCF$_{3}$",
+    "PS-19.6K-SCF$_{3}$",
+    "PS-40.4K-SCF$_{3}$",
+    "PS-110K-SCF$_{3}$",
     # "PS-1.1K-SCF3-crude",
     # "PS-10K-SCF3-crude",
     # "PS-19.6K-SCF3-crude",
@@ -77,7 +77,7 @@ gpc_metadata: list = [
     "Mn=8.5k, Mw=9.2k, Mp=9.8k",  # PS-10K
     "Mn=16.7k, Mw=17.9k, Mp=19.5k",  # PS-19.6K
     "Mn=34.6k, Mw=37.4k, Mp=41.4k",  # PS-40.4K
-    "Mn=94.0k, Mw=103.0k, Mp=111.2k",  # PS-110K
+    "Mn=94.0k, Mw=103k, Mp=111k",  # PS-110K
     "Mn=0.9k, Mw=1.1k, Mp=1.0k",  # PS-1.1K-SCF3
     "Mn=9.5k, Mw=10.2k, Mp=10.8k",  # PS-10K-SCF3
     "Mn=17.2k, Mw=18.4k, Mp=19.6k",  # PS-19.6K-SCF3
@@ -103,7 +103,7 @@ colors: list = [
     "#045a8d",
 ]
 
-xlims: list = [(7.7, 9.7), (6.7, 8.3), (6.4, 8.0), (5.9, 7.6), (5.0, 7.5)]
+xlims: list = [(7.7, 10.0), (6.7, 8.5), (6.4, 8.1), (5.9, 7.8), (5.0, 7.6)]
 
 inset_xlims: list = [(8.7, 9.1), (7.5, 7.7), (7.2, 7.35), (6.8, 6.9), (6.2, 6.45)]
 

@@ -39,7 +39,7 @@ gpc_filenames: list[str] = [
 ]
 
 labels: list = [
-    "PS-6.1K",
+    "PS-6.4K",
     r"Water + O${_2}$",
     r"Water + no O${_2}$",
     r"no Water + O${_2}$",

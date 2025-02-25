@@ -21,10 +21,11 @@ plt.rcParams["axes.linewidth"] = style["axes_linewidth"]
 # TODO: Change experiment name and filenames
 # GPC Curves
 # Experiment Name
-experiment_name: str = "005d-M1"
+experiment_name: str = "005f-A"
 
 # Result path
 result_path: Path = root_path / "results" / "MALDI" / experiment_name
+# Check if result path exists, if not make it
 if not result_path.exists():
     result_path.mkdir(parents=True)
 
@@ -33,21 +34,17 @@ data_dir: Path = root_path / "data" / "MALDI" / experiment_name
 
 # Filenames
 maldi_filenames: list[str] = [
-    # "2025_01_23_PS_Tosoh_A1000_dilute_700_3000_0_M4_1.txt",
-    # "2024_10_17_005f-A1_0_E11_1.txt",
-    "2025_01_23_005d-M1_dilute_700_3000_0_M5_1.txt",
-    # "2024_10_17_005f-A3_0_E13_1.txt",
-    # "2024_10_17_PS_Tosoh_F2_0_E6_1.txt",
-    # "2024_10_17_PS_Tosoh_F4_0_E7_1.txt",
+    "2024_10_17_PS_Tosoh_F1_0_E5_1.txt",
+    "2024_10_17_005f-A1_0_E11_1.txt",
+    "2024_10_17_005f-A2_0_E12_1.txt",
+    "2024_10_17_005f-A3_0_E13_1.txt",
 ]
 
 labels: list = [
-    # "PS-1K",
-    # "005f-A1",
-    "PS-1K-SCF$_3$",
+    "PS_Tosoh_F1",
+    "005f-A1",
+    # "005f-A2",
     # "005f-A3",
-    # "PS-F2-20K",
-    # "PS-F4-40K"
 ]
 
 if __name__ == "__main__":
@@ -55,14 +52,10 @@ if __name__ == "__main__":
         data_dir=data_dir,
         ms_data_path=maldi_filenames,
         labels=labels,
-        colors=["#ad8c09", "#e0f3db", "#7bccc4"],  # "#8286ff"
+        colors=["#8286ff", "#00ff00", "#f5c92a", "#AF69EE", "#FFC0CB"],
         result_dir=result_path,
         style_path=style_path,
-        opacity=[1, 1],
     )
-    maldi_plots.plot_maldi(xlim=(800, 3000))
+    maldi_plots.plot_maldi(xlim=(5000, 15000))
     # Trial and error with prominence to get the peaks that you want detected
-    maldi_plots.plot_maldi_zoom(xlim=(880, 1010), ylim=(0, 1), prominence=10)
-    # maldi_plots.plot_maldi_zoom_with_inset(
-    #     xlim=(850, 1020), inset_xlim=(990, 1010), prominence=10
-    # )
+    maldi_plots.plot_maldi_zoom(xlim=(9500, 10000), prominence=0.05)
