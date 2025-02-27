@@ -169,13 +169,13 @@ class TGAPlots:
                 skiprows=29,
             )
             tga_data, ms_data = self.preprocess(
-                tga_data, ms_data, initial_correction_time, initial_mass, "Time"
+                tga_data, ms_data, initial_correction_time, "Time"
             )
             mass_difference_at_time.append(
                 self.get_mass_at_time(time_for_mass_difference, tga_data)
             )
             ax[0].plot(
-                tga_data["Time/min"],
+                tga_data["Time/min"] - initial_correction_time,
                 tga_data["Mass loss/pct"],
                 label=label,
                 color=color,
@@ -190,7 +190,7 @@ class TGAPlots:
                     facecolor=color,
                 )
             ax[1].plot(
-                ms_data["Time/min"],
+                ms_data["Time/min"] - initial_correction_time,
                 ms_data[f"QMID(s:1|m:{target_mass})/A"],
                 label=label,
                 color=color,
@@ -388,3 +388,8 @@ class TGAPlots:
             / f"{self.result_name}ms_peak_area_{m_z_start}_{m_z_end}_{isothermal_temp}.svg",
             dpi=400,
         )
+
+
+def plot_summary():
+    # Plot for % functionalization study and MW study. Both of these will have different x-axis, but same y-axis (twin y-axis: TGA loss after 1200mins, and Onset temperature for depoly.)
+    pass

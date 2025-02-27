@@ -32,7 +32,7 @@ data_dir: Path = root_path / "data" / "TGA" / experiment_name
 # Filenames
 isothermal_filenames: list = [
     "F4.txt",
-    "L3-corrected.txt",
+    "L3-seferosTGA.txt",
 ]
 isothermal_ms_filenames: list = [
     "F4_000002 -temp.txt",
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     # TODO: must change temp and xlimit depending on the isothermal conditions!
     isothermal_tga_plots.plot_tga_isothermal(
         isothermal_temp=300,
-        xlim=(0, 1250),
+        xlim=(0, 1200),
         ylim=(0, 110),
         target_mass=104,
         initial_correction_time=50,

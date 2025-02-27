@@ -211,7 +211,7 @@ class TGAPlots:
                 self.get_mass_at_time(time_for_mass_difference, tga_data)
             )
             ax[0].plot(
-                tga_data["Time"],
+                tga_data["Time"] - initial_correction_time,
                 tga_data["Mass loss/pct"],
                 label=label,
                 color=color,
@@ -230,7 +230,7 @@ class TGAPlots:
             #         facecolor=color,
             #     )
             ax[1].plot(
-                ms_data["Time"],
+                ms_data["Time"] - initial_correction_time,
                 ms_data[f"Ion Current"],
                 label=label,
                 color=color,
