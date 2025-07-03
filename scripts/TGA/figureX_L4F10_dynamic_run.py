@@ -64,12 +64,12 @@ dynamic_ms_filenames: list = [
 # labels: list = ["PS-SCF3", "PS-6.1K"]
 # labels: list = ["PS-SCF3-0_1K_min", "PS-6_1K-0_1K_min"]
 # labels: list = ["PS-1.12K", "PS-1.12K-SCF3"]
-labels: list = ["PS-10K", "PS-10K-SCF3"]
+labels: list = ["PS-110K", "PS-110K-SCF3"]
 # labels: list = ["PS-19.6K", "PS-19.6K-SCF3"]
 # labels: list = ["PS-40.4K", "PS-40.4K-SCF3"]
 # labels: list = ["PS-110K", "PS-110K-SCF3"]
 colors = [style["color"][labels[0]], style["color"][labels[1]]]
-labels[1] = "PS-10K-SCF$_{3}$"
+labels[1] = "PS-110K-SCF$_{3}$"
 
 if __name__ == "__main__":
     # isothermal_tga_plots = TGAPlots(
