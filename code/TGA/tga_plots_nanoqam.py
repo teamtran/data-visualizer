@@ -177,18 +177,20 @@ class TGAPlots:
         fig, ax = plt.subplots(2, figsize=(6, 6))
         plt.subplots_adjust(hspace=0.5)
         # aesthetics
-        ax[0].set_xlabel("Time (min)", fontsize=12)
-        ax[0].set_ylabel("Mass (%)", fontsize=12)
-        ax[0].set_title(f"Isothermal TGA at {isothermal_temp}°C")
-        ax[1].set_xlabel("Time (min)", fontsize=12)
-        ax[1].set_ylabel("Ion Current (A)", fontsize=12)
-        ax[1].set_title(f"{target_mass} m/z for Isothermal TGA at {isothermal_temp}°C")
+        ax[0].set_xlabel("Time (min)", fontsize=10)
+        ax[0].set_ylabel("Mass (%)", fontsize=10)
+        ax[0].set_title(f"Isothermal TGA at {isothermal_temp}°C", fontsize=10)
+        ax[1].set_xlabel("Time (min)", fontsize=10)
+        ax[1].set_ylabel("Ion Current (A)", fontsize=10)
+        ax[1].set_title(
+            f"{target_mass} m/z for Isothermal TGA at {isothermal_temp}°C", fontsize=10
+        )
         ax[0].spines["top"].set_visible(False)
         ax[0].spines["right"].set_visible(False)
         ax[1].spines["top"].set_visible(False)
         ax[1].spines["right"].set_visible(False)
-        ax[0].tick_params(axis="both", which="major", labelsize=12, direction="in")
-        ax[1].tick_params(axis="both", which="major", labelsize=12, direction="in")
+        ax[0].tick_params(axis="both", which="major", labelsize=8, direction="in")
+        ax[1].tick_params(axis="both", which="major", labelsize=8, direction="in")
         # set xlim for the plots
         ax[0].set_xlim(xlim)
         ax[1].set_xlim(xlim)
@@ -244,16 +246,16 @@ class TGAPlots:
             linewidth=0.5,
             label="100% Mass",
         )
-        ax[0].legend()
-        ax[1].legend()
+        ax[0].legend(fontsize=8)
+        ax[1].legend(fontsize=8)
         plt.savefig(
             self.result_dir
-            / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z.png",
+            / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z_nanoqam.png",
             dpi=400,
         )
         plt.savefig(
             self.result_dir
-            / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z.svg",
+            / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z_nanoqam.svg",
             dpi=400,
         )
         print(
@@ -274,18 +276,18 @@ class TGAPlots:
         fig, ax = plt.subplots(2, figsize=(6, 6))
         plt.subplots_adjust(hspace=0.5)
         # aesthetics
-        ax[0].set_xlabel("Temp (oC)", fontsize=12)
-        ax[0].set_ylabel("Mass (%)", fontsize=12)
-        ax[0].set_title(f"Dynamic TGA")
-        ax[1].set_xlabel("Temp (oC)", fontsize=12)
-        ax[1].set_ylabel("Ion Current (A)", fontsize=12)
-        ax[1].set_title(f"{target_mass} m/z for Dynamic TGA")
+        ax[0].set_xlabel("Temp (oC)", fontsize=10)
+        ax[0].set_ylabel("Mass (%)", fontsize=10)
+        ax[0].set_title(f"Dynamic TGA", fontsize=10)
+        ax[1].set_xlabel("Temp (oC)", fontsize=10)
+        ax[1].set_ylabel("Ion Current (A)", fontsize=10)
+        ax[1].set_title(f"{target_mass} m/z for Dynamic TGA", fontsize=10)
         ax[0].spines["top"].set_visible(False)
         ax[0].spines["right"].set_visible(False)
         ax[1].spines["top"].set_visible(False)
         ax[1].spines["right"].set_visible(False)
-        ax[0].tick_params(axis="both", which="major", labelsize=12, direction="in")
-        ax[1].tick_params(axis="both", which="major", labelsize=12, direction="in")
+        ax[0].tick_params(axis="both", which="major", labelsize=8, direction="in")
+        ax[1].tick_params(axis="both", which="major", labelsize=8, direction="in")
         for tga_path, ms_path, label, color in zip(
             self.tga_data_path, self.ms_data_path, self.labels, self.colors
         ):
@@ -323,16 +325,18 @@ class TGAPlots:
             label="$T_\mathregular{depolymerization}$"
             + f" at {t_depolymerization_cutoff}% Mass",
         )
-        ax[0].legend()
-        ax[1].legend()
+        ax[0].legend(fontsize=10)
+        ax[1].legend(fontsize=10)
         ax[0].set_xlim(xlim)
         ax[1].set_xlim(xlim)
         plt.savefig(
-            self.result_dir / f"{self.result_name}tga_dynamic_{target_mass}m_z.png",
+            self.result_dir
+            / f"{self.result_name}tga_dynamic_{target_mass}m_z_nanoqam.png",
             dpi=400,
         )
         plt.savefig(
-            self.result_dir / f"{self.result_name}tga_dynamic_{target_mass}m_z.svg",
+            self.result_dir
+            / f"{self.result_name}tga_dynamic_{target_mass}m_z_nanoqam.svg",
             dpi=400,
         )
 

@@ -7,7 +7,7 @@ import json
 root_path = Path(__file__).parent.parent.parent.resolve()
 sys.path.insert(0, str(root_path))
 
-from code.TGA.tga_plots_nanoqam import TGAPlots
+from code.TGA.tga_plots import TGAPlots
 
 # Style path
 style_path: Path = root_path / "style" / "style.json"
@@ -21,37 +21,55 @@ plt.rcParams["axes.linewidth"] = style["axes_linewidth"]
 # TODO: Change experiment name and filenames
 # TGA Curves
 # Experiment Name
-experiment_name: str = "005d-B"
+experiment_name: str = "005d-L_M"
 
 # Result path
 result_path: Path = root_path / "results" / "TGA" / experiment_name
+if not result_path.exists():
+    result_path.mkdir(parents=True)
 
 # Data directory path
 data_dir: Path = root_path / "data" / "TGA" / experiment_name
 
 # Filenames
 isothermal_filenames: list = [
-    "P2934-S TG.txt",
-    "005dB1-rGPC+flash TG.txt",
-    "005dB1-rGPC TG.txt",
-    "005dB1-toyopearls TG.txt",
+    "ExpDat_2025_03_14_SL_005D_L1_isothermal.csv",
+    # "ExpDat_2025_02_25_005d-L3-isothermal-1K.csv",
 ]
 isothermal_ms_filenames: list = [
-    "P2934-S MS.txt",
-    "005dB1-rGPC+flash MS.txt",
-    "005dB1-rGPC MS.txt",
-    "005dB1-toyopearls MS.txt",
+    "ExpDat_2025_03_14_SL_005D_L1_isothermal-aeolos.csv",
+    # "ExpDat_2025_02_25_005d-L3-isothermal-1K-aeolos.csv",
 ]
 
+dynamic_filenames: list = [
+    # "ExpDat_2024_06_20_005c-B_dynamic.csv",
+    # "ExpDat_2024_06_20_PS2439_6_1K_dynamic.csv",
+    # "ExpDat_2025_02_20_PS-A1000-dynamic-1K.csv",
+    # "ExpDat_2025_02_20_005d-M1-dynamic-1K.csv",
+    # "ExpDat_2025_02_20_PS-F1-dynamic-1K.csv",
+    # "ExpDat_2025_02_20_005d-L1-dynamic-1K.csv",
+]
+dynamic_ms_filenames: list = [
+    # "ExpDat_2024_06_20_005c-B_dynamic-aeolos.csv",
+    # "ExpDat_2024_06_20_PS2439_6_1K_dynamic-aeolos.csv",
+    # "ExpDat_2025_02_20_PS-A1000-dynamic-1K-aeolos.csv",
+    # "ExpDat_2025_02_20_005d-M1-dynamic-1K-aeolos.csv",
+    # "ExpDat_2025_02_20_PS-F1-dynamic-1K-aeolos.csv",
+    # "ExpDat_2025_02_20_005d-L1-dynamic-1K-aeolos.csv",
+]
 
 # labels: list = ["PS-SCF3-1K_min", "PS-6.1K-1K_min"]
-labels: list = [
-    "PS-6.4K",
-    "PS-SCF$_3$-FLASH",
-    "PS-SCF$_3$-rGPC",
-    "PS-SCF$_3$-Toyopearls",
-]
+# labels: list = ["PS-SCF3", "PS-6.1K"]
 # labels: list = ["PS-SCF3-0_1K_min", "PS-6_1K-0_1K_min"]
+# labels: list = ["PS-1.12K", "PS-1.12K-SCF3"]
+# labels: list = ["PS-10K", "PS-10K-SCF3"]
+# labels: list = ["PS-19.6K", "PS-19.6K-SCF3"]
+# labels: list = ["PS-110K", "PS-110K-SCF3"]
+
+# labels: list = ["PS-SCF3-1K_min", "PS-6.1K-1K_min"]
+labels: list = ["PS-10K", "PS-10K-SCF3"]
+colors: list = [style["color"][labels[0]], style["color"][labels[1]]]
+labels[1] = "PS-10K-SCF$_{3}$"
 
 if __name__ == "__main__":
     isothermal_tga_plots = TGAPlots(
@@ -59,7 +77,7 @@ if __name__ == "__main__":
         tga_data_path=isothermal_filenames,
         ms_data_path=isothermal_ms_filenames,
         labels=labels,
-        colors=["#8286ff", "#f5c92a", "#e0f3db", "#7bccc4"],
+        colors=colors,
         result_dir=result_path,
         style_path=style_path,
     )
@@ -71,7 +89,7 @@ if __name__ == "__main__":
         target_mass=104,
         initial_correction_time=50,
         uncertainty=False,
-        time_for_mass_difference=1200,
+        time_for_mass_difference=1250,
     )
     # isothermal_tga_plots.plot_ms_peak_area(
     #     "isothermal", 300, initial_time=0, end_time=1500, m_z_start=60, m_z_end=150
@@ -81,13 +99,17 @@ if __name__ == "__main__":
     #     tga_data_path=dynamic_filenames,
     #     ms_data_path=dynamic_ms_filenames,
     #     labels=labels,
-    #     colors=["#f5c92a", "#8286ff", "#ad8c09", "#4772ff"],
+    #     # colors=["#d9d9d9", "#a6bddb"], # 1.12K
+    #     colors=["#bdbdbd", "#74a9cf"],  # 10K
+    #     # colors=["#969696", "#3690c0"], # 19.6K
+    #     # colors=["#636363", "#0570b0"], # 40.4K
+    #     # colors=["#252525", "#045a8d"], # 110K
     #     result_dir=result_path,
     #     style_path=style_path,
     # )
     # dynamic_tga_plots.plot_tga_dynamic(
     #     t_depolymerization_cutoff=99.5,
     #     target_mass=104,
-    #     xlim=(230, 350),
-    #     initial_correction_temp=230,
+    #     xlim=(250, 400),
+    #     initial_correction_temp=250,
     # )

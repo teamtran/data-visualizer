@@ -54,25 +54,20 @@ isothermal_ms_filenames: list = [
 dynamic_filenames: list = [
     "ExpDat_2025_02_20_PS-A1000-dynamic-1K.csv",
     "ExpDat_2025_02_20_005d-M1-dynamic-1K.csv",
-    "ExpDat_2025_03_10_SL_005F_J1_dynamic.csv",
-    "ExpDat_2025_03_11_SL_005F_J3_dynamic.csv",
+    # "ExpDat_2025_03_10_SL_005F_J1_dynamic.csv",
+    # "ExpDat_2025_03_11_SL_005F_J3_dynamic.csv",
 ]
 dynamic_ms_filenames: list = [
     "ExpDat_2025_02_20_PS-A1000-dynamic-1K-aeolos.csv",
     "ExpDat_2025_02_20_005d-M1-dynamic-1K-aeolos.csv",
-    "ExpDat_2025_03_10_SL_005F_J1_dynamic-aeolos.csv",
-    "ExpDat_2025_03_11_SL_005F_J3_dynamic-aeolos.csv",
+    # "ExpDat_2025_03_10_SL_005F_J1_dynamic-aeolos.csv",
+    # "ExpDat_2025_03_11_SL_005F_J3_dynamic-aeolos.csv",
 ]
 
 # labels: list = ["PS-SCF3-1K_min", "PS-6.1K-1K_min"]
 # labels: list = ["PS-SCF3", "PS-6.1K"]
 # labels: list = ["PS-SCF3-0_1K_min", "PS-6_1K-0_1K_min"]
-labels: list = [
-    "PS-1.12K",
-    "PS-1.12K-SCF3-3.28%",
-    "PS-1.12K-SCF3-3.21%",
-    "PS-1.12K-SCF3-5.33%",
-]
+labels: list = ["PS-1.12K", "PS-1.12K-SCF$_{3}$"]
 # labels: list = ["PS-10K", "PS-10K-SCF3"]
 # labels: list = ["PS-19.6K", "PS-19.6K-SCF3"]
 # labels: list = ["PS-40.4K", "PS-40.4K-SCF3"]
@@ -83,9 +78,8 @@ colors = [
     style["color"]["green_blue_3"],
     style["color"]["green_blue_6"],
 ]
-labels[1] = "PS-1.12K-SCF$_{3}$-3.28%"
-labels[2] = "PS-1.12K-SCF$_{3}$-3.21%"
-labels[3] = "PS-1.12K-SCF$_{3}$-5.33%"
+# labels[2] = "PS-1.12K-SCF$_{3}$-3.21%"
+# labels[3] = "PS-1.12K-SCF$_{3}$-5.33%"
 
 if __name__ == "__main__":
     # isothermal_tga_plots = TGAPlots(
