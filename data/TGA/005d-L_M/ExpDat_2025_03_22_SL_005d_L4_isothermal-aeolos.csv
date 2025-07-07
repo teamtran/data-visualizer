@@ -1,0 +1,31 @@
+#EXPORTTYPE:                 ,DATA ALL                                
+#FILE:                       ,2025_03_22_SL_005d_L4_isothermal.ngb-ss5
+#FORMAT:                     ,NETZSCH5                                
+#FTYPE:                      ,ASCII                                   
+#IDENTITY:                   ,2025_03_22_SL_005d_L4_i                 
+#DECIMAL:                    ,POINT                                   
+#SEPARATOR:                  ,COMMA                                   
+#MTYPE:                      ,TIC                                     
+#INSTRUMENT:                 ,NETZSCH STA 449F5                       
+#PROJECT:                    ,PS                                      
+#DATE/TIME:                  ,3/22/2025 4:30:26 PM (UTC-4)            
+#CORR. FILE:                 ,                                        
+#TEMPCAL:                    ,13-11-2024 10:37                        
+#SENSITIVITY:                ,28-06-2023 13:53                        
+#LABORATORY:                 ,Tran/Aspuru                             
+#OPERATOR:                   ,Stanley                                 
+#REMARK:                     ,2025_03_22_SL_005d_L4_isothermal        
+#SAMPLE:                     ,2025_03_22_SL_005d_L4_i                 
+#SAMPLE MASS /mg:            ,4.98                                    
+#MATERIAL:                   ,Polystyrene                             
+#REFERENCE:                  ,                                        
+#REFERENCE MASS /mg:         ,0                                       
+#TYPE OF CRUCIBLE:           ,Al2O3 85 ‘l, open                       
+#SAMPLE CRUCIBLE MASS /mg:   ,0                                       
+#REFERENCE CRUCIBLE MASS /mg:,0                                       
+#DSC RANGE /‘V:              ,5000                                    
+#TG RANGE /mg:               ,35000                                   
+                             ,                                        
+
+#*RESULTS:,File,Y_value,Unit,Mass_Range_min,Mass_Range_max,Unit,Temp_Range_min,Temp_Range_max,Unit,Time_Range_min,Time_Range_max,Unit
+
