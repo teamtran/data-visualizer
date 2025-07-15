@@ -4,6 +4,7 @@ import matplotlib.ticker as ticker
 import matplotlib
 import numpy as np
 import scipy.stats as stats
+from scipy.stats import linregress
 import pandas as pd
 import json
 import os
@@ -59,13 +60,37 @@ class TGAPlots:
         time_or_temp: str = "Time",
     ) -> pd.DataFrame:
         """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to TGA-MS."""
+        # Process TGA data
         # Truncate Temp./C column to Temp
-        tga_data.columns = tga_data.columns.str.replace(tga_data.columns[0], "Temp")
-        tga_data.columns = tga_data.columns.str.replace(
-            tga_data.columns[3], "Mass loss/pct"
-        )
-        # Truncate Temp./C column to Temp in ms_raw_data
-        ms_data.columns = ms_data.columns.str.replace(ms_data.columns[0], "Temp")
+        new_columns = tga_data.columns.tolist()
+        new_columns[0] = "Temp"
+        new_columns[3] = "Mass loss/pct"
+        tga_data.columns = new_columns
+
+        # Process MS data with try-except
+        try:
+            # Truncate Temp./C column to Temp in ms_raw_data
+            ms_data_columns = ms_data.columns.tolist()
+            ms_data_columns[0] = "Temp"
+            ms_data.columns = ms_data_columns
+
+            # Find the row closest to the initial_correction for ms_data
+            if time_or_temp == "Time":
+                initial_correction_row_ms: int = ms_data.iloc[
+                    (ms_data["Time/min"] - initial_correction).abs().argsort()[:1]
+                ].index[0]
+            else:
+                initial_correction_row_ms: int = ms_data.iloc[
+                    (ms_data["Temp"] - initial_correction).abs().argsort()[:1]
+                ].index[0]
+
+            # Remove the rows before the initial_correction_time_row for ms_data
+            ms_data = ms_data.iloc[initial_correction_row_ms:]
+
+        except Exception as e:
+            print(f"Warning: Could not process MS data - {e}")
+            # Set ms_data to None or empty DataFrame if processing fails
+            ms_data = pd.DataFrame()
 
         # Account for uncertainty: balance drift (0.002mg/hr); balance uncertainty (2.5e-5mg)
         # tga_data["mass_loss_uncertainty"] = (
@@ -76,29 +101,22 @@ class TGAPlots:
         #     tga_data["mass_loss_uncertainty"] * 100 / initial_mass
         # )
 
-        # find the row closest to the initial_correction_time for tga_data
+        # Find the row closest to the initial_correction_time for tga_data
         if time_or_temp == "Time":
             initial_correction_row: int = tga_data.iloc[
                 (tga_data["Time/min"] - initial_correction).abs().argsort()[:1]
-            ].index[0]
-            # find the row closest to the initial correction time for ms_data
-            initial_correction_row_ms: int = ms_data.iloc[
-                (ms_data["Time/min"] - initial_correction).abs().argsort()[:1]
             ].index[0]
         else:
             initial_correction_row: int = tga_data.iloc[
                 (tga_data["Temp"] - initial_correction).abs().argsort()[:1]
             ].index[0]
-            # find the row closest to the initial correction time for ms_data
-            initial_correction_row_ms: int = ms_data.iloc[
-                (ms_data["Temp"] - initial_correction).abs().argsort()[:1]
-            ].index[0]
+
         # Subtract 0 from the Mass loss/mg datapoint from the initial_correction_time_row
         correction_mass = 100 - tga_data["Mass loss/pct"][initial_correction_row]
         tga_data["Mass loss/pct"] = tga_data["Mass loss/pct"] + correction_mass
-        # Remove the rows before the initial_correction_time_row for both tga_data and ms_data
+
+        # Remove the rows before the initial_correction_time_row for tga_data
         tga_data = tga_data.iloc[initial_correction_row:]
-        ms_data = ms_data.iloc[initial_correction_row_ms:]
 
         return tga_data, ms_data
 
@@ -127,27 +145,18 @@ class TGAPlots:
         """
         Plot several TGA isothermal data for comparison (can handle 1 or more).
         """
-        fig, ax = plt.subplots(2, figsize=(6, 6))
+        fig, ax = plt.subplots(1, figsize=(4, 3.25))
         plt.subplots_adjust(hspace=0.5)
         # aesthetics
-        ax[0].set_xlabel("Time (min)", fontsize=10)
-        ax[0].set_ylabel("Mass (%)", fontsize=10)
-        ax[0].set_title(f"Isothermal TGA at {isothermal_temp}°C", fontsize=10)
-        ax[1].set_xlabel("Time (min)", fontsize=10)
-        ax[1].set_ylabel("Ion Current (A)", fontsize=10)
-        ax[1].set_title(
-            f"{target_mass} m/z for Isothermal TGA at {isothermal_temp}°C", fontsize=10
-        )
-        ax[0].spines["top"].set_visible(False)
-        ax[0].spines["right"].set_visible(False)
-        ax[1].spines["top"].set_visible(False)
-        ax[1].spines["right"].set_visible(False)
-        ax[0].tick_params(axis="both", which="major", labelsize=8, direction="in")
-        ax[1].tick_params(axis="both", which="major", labelsize=8, direction="in")
+        ax.set_xlabel("Time (min)", fontsize=10)
+        ax.set_ylabel("Mass (%)", fontsize=10)
+        # ax.set_title(f"Isothermal TGA at {isothermal_temp}°C", fontsize=10)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=8, direction="in")
         # set xlim for the plots
-        ax[0].set_xlim(xlim)
-        ax[1].set_xlim(xlim)
-        ax[0].set_ylim(ylim)
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
         # ax[1].set_ylim(0, 0.2e-12)
         mass_difference_at_time = []
         for tga_path, ms_path, label, color in zip(
@@ -164,19 +173,13 @@ class TGAPlots:
                 on_bad_lines="skip",
                 skiprows=num_skiprows,
             )
-            ms_data = pd.read_csv(
-                self.data_dir / ms_path,
-                encoding="iso-8859-1",
-                on_bad_lines="skip",
-                skiprows=29,
-            )
             tga_data, ms_data = self.preprocess(
-                tga_data, ms_data, initial_correction_time, "Time"
+                tga_data, None, initial_correction_time, "Time"
             )
             mass_difference_at_time.append(
                 100 - self.get_mass_at_time(time_for_mass_difference, tga_data)
             )
-            ax[0].plot(
+            ax.plot(
                 tga_data["Time/min"] - initial_correction_time,
                 tga_data["Mass loss/pct"],
                 label=label,
@@ -184,31 +187,24 @@ class TGAPlots:
                 linewidth=1,
             )
             if uncertainty:
-                ax[0].fill_between(
+                ax.fill_between(
                     tga_data["Time/min"],
                     tga_data["Mass loss/pct"] - tga_data["mass_loss_pct_uncertainty"],
                     tga_data["Mass loss/pct"] + tga_data["mass_loss_pct_uncertainty"],
                     alpha=0.3,
                     facecolor=color,
                 )
-            ax[1].plot(
-                ms_data["Time/min"] - initial_correction_time,
-                ms_data[f"QMID(s:1|m:{target_mass})/A"],
-                label=label,
-                color=color,
-                linewidth=1,
-            )
-        ax[0].axhline(
+        ax.axhline(
             y=100,
             color="r",
             linestyle="--",
             linewidth=0.5,
             label="100% Mass",
         )
-        ax[0].set_yticks([0, 20, 40, 60, 80, 100])  # Add this line
-        # ax[0].grid(True, linestyle="-", alpha=0.2, linewidth=0.5, color="gray")
-        ax[0].legend(fontsize=10)
-        ax[1].legend(fontsize=10)
+        ax.set_yticks([0, 20, 40, 60, 80, 100])  # Add this line
+        # ax.grid(True, linestyle="-", alpha=0.2, linewidth=0.5, color="gray")
+        ax.legend(fontsize=10)
+        plt.tight_layout()
         plt.savefig(
             self.result_dir
             / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z.png",
@@ -216,7 +212,8 @@ class TGAPlots:
         )
         plt.savefig(
             self.result_dir
-            / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z.svg",
+            / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z.eps",
+            format="eps",
             dpi=400,
         )
         print(
@@ -234,21 +231,14 @@ class TGAPlots:
         """
         Plot the TGA dynamic data.
         """
-        fig, ax = plt.subplots(2, figsize=(6, 6))
+        fig, ax = plt.subplots(1, figsize=(4, 3.25))
         plt.subplots_adjust(hspace=0.5)
         # aesthetics
-        ax[0].set_xlabel("Temp ($^{o}$C)", fontsize=10)
-        ax[0].set_ylabel("Mass (%)", fontsize=10)
-        ax[0].set_title(f"Dynamic TGA", fontsize=10)
-        ax[1].set_xlabel("Temp ($^{o}$C)", fontsize=10)
-        ax[1].set_ylabel("Ion Current (A)", fontsize=10)
-        ax[1].set_title(f"{target_mass} m/z for Dynamic TGA", fontsize=10)
-        ax[0].spines["top"].set_visible(False)
-        ax[0].spines["right"].set_visible(False)
-        ax[1].spines["top"].set_visible(False)
-        ax[1].spines["right"].set_visible(False)
-        ax[0].tick_params(axis="both", which="major", labelsize=8, direction="in")
-        ax[1].tick_params(axis="both", which="major", labelsize=8, direction="in")
+        ax.set_xlabel("Temp ($^{o}$C)", fontsize=10)
+        ax.set_ylabel("Mass (%)", fontsize=10)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=8, direction="in")
         for tga_path, ms_path, label, color in zip(
             self.tga_data_path, self.ms_data_path, self.labels, self.colors
         ):
@@ -266,7 +256,7 @@ class TGAPlots:
                 skiprows=29,
             )
             tga_data, ms_data = self.preprocess(
-                tga_data, ms_data, initial_correction_temp, "Temp"
+                tga_data, None, initial_correction_temp, "Temp"
             )
             # find the index at which the mass loss is closest to the t_depolymerization_cutoff
             t_depolymerization_temp = (
@@ -279,18 +269,57 @@ class TGAPlots:
                 .values[0]
             )
             print(f"{label}: {t_depolymerization_temp}")
-            ax[0].plot(
+            ax.plot(
                 tga_data["Temp"], tga_data["Mass loss/pct"], label=label, color=color
             )
-            ax[1].plot(
-                ms_data["Temp"],
-                ms_data[f"QMID(s:1|m:{target_mass})/A"],
-                label=label,
+            # Set colors for the axis labels
+            # Draw lines for onset temperature determination
+            (
+                baseline_slope,
+                baseline_intercept,
+                gradient_slope,
+                gradient_intercept,
+                onset_temp,
+            ) = self.calculate_onset_t(tga_data, xlim=xlim)
+            # Create temperature range for plotting the extrapolated lines
+            temp_range = np.linspace(xlim[0], xlim[1], 100)
+
+            # Plot baseline extrapolation line
+            baseline_line = baseline_slope * temp_range + baseline_intercept
+            ax.plot(
+                temp_range,
+                baseline_line,
+                ":",
+                linewidth=1,
                 color=color,
+                alpha=0.8,
             )
-        # Set colors for the axis labels
+
+            # Plot gradient extrapolation line
+            gradient_line = gradient_slope * temp_range + gradient_intercept
+            ax.plot(
+                temp_range,
+                gradient_line,
+                ":",
+                linewidth=1,
+                color=color,
+                alpha=0.8,
+            )
+
+            # Mark onset temperature point
+            onset_mass_loss = baseline_slope * onset_temp + baseline_intercept
+            ax.plot(
+                onset_temp,
+                onset_mass_loss,
+                "x",
+                markersize=6,
+                label=label + f" (T{'$_{onset}$'} = {onset_temp:.1f}°C)",
+                color=color,
+                zorder=5,
+            )
+
         # Draw a line in the y-axis at y=99%
-        ax[0].axhline(
+        ax.axhline(
             y=t_depolymerization_cutoff,
             color="r",
             linestyle="--",
@@ -299,18 +328,19 @@ class TGAPlots:
             + f" at {t_depolymerization_cutoff}% Mass",
         )
 
-        ax[0].legend(fontsize=10)
-        ax[1].legend(fontsize=10)
-        ax[0].set_xlim(xlim)
-        ax[1].set_xlim(xlim)
-        ax[0].set_yticks([0, 20, 40, 60, 80, 100])  # Add this line
-        # ax[0].grid(True, linestyle="-", alpha=0.2, linewidth=0.5, color="gray")
+        ax.legend(fontsize=10)
+        ax.set_xlim(xlim)
+        ax.set_yticks([0, 20, 40, 60, 80, 100])  # Add this line
+        ax.set_ylim(0, 100)
+        plt.tight_layout()
+        # ax.grid(True, linestyle="-", alpha=0.2, linewidth=0.5, color="gray")
         plt.savefig(
             self.result_dir / f"{self.result_name}tga_dynamic_{target_mass}m_z.png",
             dpi=400,
         )
         plt.savefig(
-            self.result_dir / f"{self.result_name}tga_dynamic_{target_mass}m_z.svg",
+            self.result_dir / f"{self.result_name}tga_dynamic_{target_mass}m_z.eps",
+            format="eps",
             dpi=400,
         )
 
@@ -395,7 +425,656 @@ class TGAPlots:
             dpi=400,
         )
 
+    def calculate_onset_t(self, tga_data: pd.DataFrame, xlim: tuple):
+        """Calculate onset temperature using two linear extrapolations (one from the initial baseline, and another from the greatest gradient)
 
-def plot_summary():
-    # Plot for % functionalization study and MW study. Both of these will have different x-axis, but same y-axis (twin y-axis: TGA loss after 1200mins, and Onset temperature for depoly.)
-    pass
+        Args:
+            tga_data (pd.DataFrame): _description_
+        """
+        # Filter for xlim windoww
+        tga_data = tga_data[tga_data["Temp"].between(xlim[0], xlim[1] - 5)]
+        tga_data.reset_index(inplace=True)
+        # 1. Calculate initial baseline (before significant mass loss)
+        # Use data points before 2% mass loss for baseline
+        baseline_data = tga_data[tga_data["Mass loss/pct"] < 2.0]
+        if len(baseline_data) < 2:
+            # If not enough points, use first 10% of data
+            baseline_data = tga_data.iloc[: max(2, len(tga_data) // 10)]
+
+        baseline_slope, baseline_intercept, _, _, _ = linregress(
+            baseline_data["Temp"], baseline_data["Mass loss/pct"]
+        )
+
+        # 2. Find the region with greatest gradient (steepest mass loss)
+        # Calculate derivative (gradient) of mass loss with respect to temperature
+        temp_diff = tga_data["Temp"].diff()
+        mass_diff = tga_data["Mass loss/pct"].diff()
+        gradient = mass_diff / temp_diff
+
+        # Find the index with maximum gradient (steepest slope)
+        # Use rolling window to smooth and find sustained high gradient
+        window_size = min(10, len(gradient) // 20)  # Adaptive window size
+        if window_size < 2:
+            window_size = 2
+
+        gradient_smooth = gradient.rolling(window=window_size, center=True).mean()
+        max_gradient_idx = gradient_smooth.idxmin()  # most negative
+
+        # Define region around maximum gradient for linear fit
+        # Use points within ±20% of data length around max gradient point
+        fit_range = max(5, len(tga_data) // 10)
+        start_idx = max(0, max_gradient_idx - fit_range)
+        end_idx = min(len(tga_data), max_gradient_idx + fit_range)
+
+        gradient_region = tga_data.iloc[start_idx:end_idx]
+
+        # Fit linear regression to the steepest gradient region
+        gradient_slope, gradient_intercept, _, _, _ = linregress(
+            gradient_region["Temp"], gradient_region["Mass loss/pct"]
+        )
+
+        # 3. Calculate onset temperature as intersection of the two lines
+        # baseline: y = baseline_slope * x + baseline_intercept
+        # gradient: y = gradient_slope * x + gradient_intercept
+        # Intersection: baseline_slope * x + baseline_intercept = gradient_slope * x + gradient_intercept
+        # Solving for x: x = (gradient_intercept - baseline_intercept) / (baseline_slope - gradient_slope)
+
+        if abs(baseline_slope - gradient_slope) < 1e-10:
+            # Lines are parallel, return temperature at maximum gradient
+            onset_temp = tga_data.iloc[max_gradient_idx]["Temp"]
+        else:
+            onset_temp = (gradient_intercept - baseline_intercept) / (
+                baseline_slope - gradient_slope
+            )
+
+        return (
+            baseline_slope,
+            baseline_intercept,
+            gradient_slope,
+            gradient_intercept,
+            onset_temp,
+        )
+
+    def plot_onset_temperature_vs_mn(self, summary_dir):
+        """
+        Plot dynamic onset temperature vs molecular weight for PS samples
+        with and without SCF3 functionalization.
+
+        Parameters:
+        summary_dir (str): Directory containing the mn_summary.csv file
+
+        Returns:
+        None: Displays the plot
+        """
+
+        # Read the CSV file
+        csv_path = self.data_dir / summary_dir
+        df = pd.read_csv(csv_path)
+
+        # Separate data into functionalized and non-functionalized samples
+        df_pristine = df[~df["name"].str.contains("SCF3", na=False)]
+        df_functionalized = df[df["name"].str.contains("SCF3", na=False)]
+
+        # Clean data for onset temperature (remove NaN values)
+        df_pristine_onset = df_pristine.dropna(subset=["mn", "dynamic_onset_t"])
+        df_func_onset = df_functionalized.dropna(subset=["mn", "dynamic_onset_t"])
+
+        # Create the plot
+        fig, ax = plt.subplots(figsize=(6, 6))
+
+        # Plot onset temperature data
+        ax.scatter(
+            df_pristine_onset["mn"],
+            df_pristine_onset["dynamic_onset_t"],
+            color="red",
+            marker="o",
+            s=80,
+            alpha=0.7,
+            label="Pristine PS",
+            edgecolors="darkred",
+            linewidth=1,
+        )
+
+        ax.scatter(
+            df_func_onset["mn"],
+            df_func_onset["dynamic_onset_t"],
+            color="blue",
+            marker="s",
+            s=80,
+            alpha=0.7,
+            label="PS-SCF3",
+            edgecolors="darkblue",
+            linewidth=1,
+        )
+
+        # Formatting
+        ax.set_xlabel("Molecular Weight (Mn) [kg/mol]", fontsize=12)
+        ax.set_ylabel("Dynamic Onset Temperature [°C]", fontsize=12)
+        ax.set_title("Dynamic Onset Temperature vs Molecular Weight", fontsize=14)
+        ax.grid(True, alpha=0.3)
+        ax.legend(fontsize=10)
+
+        # Adjust layout
+        plt.tight_layout()
+
+        # Save the plot
+        plt.savefig(
+            self.result_dir / f"onset_temperature_vs_mn.png",
+            dpi=400,
+        )
+        plt.savefig(
+            self.result_dir / f"onset_temperature_vs_mn.eps",
+            format="eps",
+            dpi=400,
+        )
+
+    def plot_delta_mass_loss_vs_mn(self, summary_dir):
+        """
+        Plot delta isothermal mass loss (SCF3 - Pristine) vs molecular weight
+        for PS samples, using the Mn of the pristine PS as the x-axis.
+
+        Parameters:
+        summary_dir (str): Directory containing the mn_summary.csv file
+
+        Returns:
+        None: Displays the plot
+        """
+
+        # Read the CSV file
+        csv_path = self.data_dir / summary_dir
+        df = pd.read_csv(csv_path)
+
+        # Separate data into functionalized and non-functionalized samples
+        df_pristine = df[~df["name"].str.contains("SCF3", na=False)]
+        df_functionalized = df[df["name"].str.contains("SCF3", na=False)]
+
+        # Clean data for mass loss (remove NaN values)
+        df_pristine_mass = df_pristine.dropna(
+            subset=["mn", "isothermal_mass_loss_after_1200mins"]
+        )
+        df_func_mass = df_functionalized.dropna(
+            subset=["mn", "isothermal_mass_loss_after_1200mins"]
+        )
+
+        # Calculate delta mass loss for matched samples
+        delta_data = []
+
+        for _, pristine_row in df_pristine_mass.iterrows():
+            # Find matching SCF3 sample (you may need to adjust this matching logic
+            # based on your sample naming convention)
+            pristine_name = pristine_row["name"]
+
+            # Look for corresponding SCF3 sample
+            # Assuming SCF3 samples have similar base names with "SCF3" added
+            matching_scf3 = df_func_mass[
+                df_func_mass["name"].str.contains(
+                    pristine_name.replace("_pristine", "").replace("pristine", ""),
+                    na=False,
+                )
+            ]
+
+            if not matching_scf3.empty:
+                # If multiple matches, take the first one (you may want to refine this)
+                scf3_row = matching_scf3.iloc[0]
+
+                # Calculate delta (SCF3 - Pristine)
+                delta_mass_loss = (
+                    scf3_row["isothermal_mass_loss_after_1200mins"]
+                    - pristine_row["isothermal_mass_loss_after_1200mins"]
+                )
+
+                delta_data.append(
+                    {
+                        "mn_pristine": pristine_row["mn"],
+                        "delta_mass_loss": delta_mass_loss,
+                        "pristine_name": pristine_name,
+                        "scf3_name": scf3_row["name"],
+                    }
+                )
+
+        # Convert to DataFrame for easier handling
+        delta_df = pd.DataFrame(delta_data)
+
+        if delta_df.empty:
+            print(
+                "No matching SCF3/Pristine sample pairs found. Please check sample naming convention."
+            )
+            return
+
+        # Create the plot
+        fig, ax = plt.subplots(figsize=(8, 6))
+
+        # Plot delta mass loss data
+        ax.scatter(
+            delta_df["mn_pristine"],
+            delta_df["delta_mass_loss"],
+            color="green",
+            marker="o",
+            s=80,
+            alpha=0.7,
+            label="Δ Mass Loss (SCF3 - Pristine)",
+            edgecolors="darkgreen",
+            linewidth=1,
+        )
+
+        # Add a horizontal line at y=0 for reference
+        ax.axhline(y=0, color="black", linestyle="--", alpha=0.5, linewidth=1)
+
+        # Formatting
+        ax.set_xlabel("Molecular Weight (Mn) of Pristine PS [kg/mol]", fontsize=12)
+        ax.set_ylabel("Δ Isothermal Mass Loss after 1200 mins [%]", fontsize=12)
+        ax.set_title(
+            "Delta Mass Loss (SCF3 - Pristine) vs Molecular Weight", fontsize=14
+        )
+        ax.grid(True, alpha=0.3)
+        ax.legend(fontsize=10)
+
+        # Add text annotation showing number of data points
+        ax.text(
+            0.02,
+            0.98,
+            f"n = {len(delta_df)} sample pairs",
+            transform=ax.transAxes,
+            fontsize=10,
+            verticalalignment="top",
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+        )
+
+        # Adjust layout
+        plt.tight_layout()
+
+        # Save the plot
+        plt.savefig(
+            self.result_dir / f"summary_plots_delta_mass_loss_vs_mn.png",
+            dpi=400,
+        )
+        plt.savefig(
+            self.result_dir / f"summary_plots_delta_mass_loss_vs_mn.svg",
+            dpi=400,
+        )
+
+    def plot_mass_loss_vs_mn(self, summary_dir):
+        """
+        Plot isothermal mass loss vs molecular weight for PS samples
+        with and without SCF3 functionalization.
+
+        Parameters:
+        summary_dir (str): Directory containing the mn_summary.csv file
+
+        Returns:
+        None: Displays the plot
+        """
+
+        # Read the CSV file
+        csv_path = self.data_dir / summary_dir
+        df = pd.read_csv(csv_path)
+
+        # Separate data into functionalized and non-functionalized samples
+        df_pristine = df[~df["name"].str.contains("SCF3", na=False)]
+        df_functionalized = df[df["name"].str.contains("SCF3", na=False)]
+
+        # Clean data for mass loss (remove NaN values)
+        df_pristine_mass = df_pristine.dropna(
+            subset=["mn", "isothermal_mass_loss_after_1200mins"]
+        )
+        df_func_mass = df_functionalized.dropna(
+            subset=["mn", "isothermal_mass_loss_after_1200mins"]
+        )
+
+        # Create the plot
+        fig, ax = plt.subplots(figsize=(8, 6))
+
+        # Plot mass loss data
+        ax.scatter(
+            df_pristine_mass["mn"],
+            df_pristine_mass["isothermal_mass_loss_after_1200mins"],
+            color="red",
+            marker="o",
+            s=80,
+            alpha=0.7,
+            label="Pristine PS",
+            edgecolors="darkred",
+            linewidth=1,
+        )
+
+        ax.scatter(
+            df_func_mass["mn"],
+            df_func_mass["isothermal_mass_loss_after_1200mins"],
+            color="blue",
+            marker="s",
+            s=80,
+            alpha=0.7,
+            label="PS-SCF3",
+            edgecolors="darkblue",
+            linewidth=1,
+        )
+
+        # Formatting
+        ax.set_xlabel("Molecular Weight (Mn) [kg/mol]", fontsize=12)
+        ax.set_ylabel("Isothermal Mass Loss after 1200 mins [%]", fontsize=12)
+        ax.set_title("Isothermal Mass Loss vs Molecular Weight", fontsize=14)
+        ax.grid(True, alpha=0.3)
+        ax.legend(fontsize=10)
+
+        # Adjust layout
+        plt.tight_layout()
+
+        # Save the plot
+        plt.savefig(
+            self.result_dir / f"summary_plots_mass_loss_vs_mn.png",
+            dpi=400,
+        )
+        plt.savefig(
+            self.result_dir / f"summary_plots_mass_loss_vs_mn.eps",
+            format="eps",
+            dpi=400,
+        )
+
+    def plot_overlay_isothermal(
+        self,
+        virgin_ps_data_paths,
+        scf3_ps_data_paths,
+        isothermal_temp: float = 300,
+        target_mass: int = 104,
+        xlim: tuple = (0, 1200),
+        ylim: tuple = (0, 100),
+        initial_correction_time: int = 50,
+        uncertainty: bool = False,
+        time_for_mass_difference: float = 1200,
+    ):
+        """
+        Plots an overlay of all the virgin PS and PS-SCF3 isothermal graphs.
+
+        Args:
+            virgin_ps_data_paths (list): List of tuples [(tga_path, ms_path, label), ...]
+            scf3_ps_data_paths (list): List of tuples [(tga_path, ms_path, label), ...]
+            isothermal_temp (float): Temperature for isothermal analysis
+            target_mass (int): Target mass for MS analysis
+            xlim (tuple): X-axis limits
+            ylim (tuple): Y-axis limits
+            initial_correction_time (int): Time correction for initial period
+            uncertainty (bool): Whether to show uncertainty bands
+            time_for_mass_difference (float): Time point for mass difference calculation
+        """
+
+        fig, ax = plt.subplots(1, figsize=(4, 3.25))
+        plt.subplots_adjust(hspace=0.5)
+
+        # Aesthetics
+        ax.set_xlabel("Time (min)", fontsize=10)
+        ax.set_ylabel("Mass (%)", fontsize=10)
+
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=10, direction="in")
+
+        # Set limits
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+        ax.set_yticks([0, 20, 40, 60, 80, 100])
+
+        # Generate different shades of #F4BD14 for SCF3 samples
+        base_color = "#F4BD14"
+        scf3_colors = []
+        num_scf3 = len(scf3_ps_data_paths)
+
+        if num_scf3 > 0:
+            # Create variations by adjusting saturation and lightness
+            import matplotlib.colors as mcolors
+
+            base_rgb = mcolors.hex2color(base_color)
+            base_hsv = mcolors.rgb_to_hsv(base_rgb)
+
+            for i in range(num_scf3):
+                # Vary the saturation and value to create different shades
+                saturation_factor = 0.6 + (0.4 * i / max(1, num_scf3 - 1))  # 0.6 to 1.0
+                value_factor = 0.7 + (0.3 * i / max(1, num_scf3 - 1))  # 0.7 to 1.0
+
+                new_hsv = [
+                    base_hsv[0],
+                    base_hsv[1] * saturation_factor,
+                    base_hsv[2] * value_factor,
+                ]
+                new_rgb = mcolors.hsv_to_rgb(new_hsv)
+                scf3_colors.append(mcolors.rgb2hex(new_rgb))
+        # Reverse scf3_colors order
+        scf3_colors.reverse()
+
+        # Gray colors for virgin PS samples
+        virgin_colors = ["#808080", "#A0A0A0", "#606060", "#909090", "#707070"]
+
+        mass_difference_at_time = []
+
+        # Plot virgin PS samples in gray
+        # for i, (tga_path, label) in enumerate(virgin_ps_data_paths):
+        #     color = virgin_colors[i % len(virgin_colors)]
+
+        #     # Read and process TGA data
+        #     tga_data = pd.read_csv(
+        #         self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="warn"
+        #     )
+        #     initial_mass: float = float(tga_data.at[17, tga_data.columns[1]])
+        #     num_skiprows: int = _find_empty_row(tga_data)
+        #     tga_data = pd.read_csv(
+        #         self.data_dir / tga_path,
+        #         encoding="iso-8859-1",
+        #         on_bad_lines="skip",
+        #         skiprows=num_skiprows,
+        #     )
+
+        #     # Preprocess data
+        #     tga_data, ms_data = self.preprocess(
+        #         tga_data, None, initial_correction_time, "Time"
+        #     )
+
+        #     mass_difference_at_time.append(
+        #         100 - self.get_mass_at_time(time_for_mass_difference, tga_data)
+        #     )
+
+        #     # Plot TGA data
+        #     ax.plot(
+        #         tga_data["Time/min"] - initial_correction_time,
+        #         tga_data["Mass loss/pct"],
+        #         label=f"Virgin PS - {label}",
+        #         color=color,
+        #         linewidth=1.5,
+        #         linestyle="-",
+        #     )
+
+        # Plot PS-SCF3 samples in shades of #F4BD14
+        for i, (tga_path, label) in enumerate(scf3_ps_data_paths):
+            color = scf3_colors[i % len(scf3_colors)]
+
+            # Read and process TGA data
+            tga_data = pd.read_csv(
+                self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="warn"
+            )
+            initial_mass: float = float(tga_data.at[17, tga_data.columns[1]])
+            num_skiprows: int = _find_empty_row(tga_data)
+            tga_data = pd.read_csv(
+                self.data_dir / tga_path,
+                encoding="iso-8859-1",
+                on_bad_lines="skip",
+                skiprows=num_skiprows,
+            )
+
+            # Preprocess data
+            tga_data, ms_data = self.preprocess(
+                tga_data, None, initial_correction_time, "Time"
+            )
+
+            mass_difference_at_time.append(
+                100 - self.get_mass_at_time(time_for_mass_difference, tga_data)
+            )
+
+            # Plot TGA data
+            ax.plot(
+                tga_data["Time/min"] - initial_correction_time,
+                tga_data["Mass loss/pct"],
+                label=f"PS-SCF3 (Mn={label})",
+                color=color,
+                linewidth=1,
+                linestyle="-",
+            )
+
+        # Add reference line at 100% mass
+        ax.axhline(
+            y=100,
+            color="r",
+            linestyle="--",
+            linewidth=0.5,
+            label="100% Mass",
+        )
+
+        # Add legends
+        ax.legend(fontsize=10, loc="best")
+
+        # Save the plots
+        plt.savefig(
+            self.result_dir
+            / f"{self.result_name}overlay_isothermal_{isothermal_temp}_{target_mass}m_z.png",
+            dpi=400,
+            bbox_inches="tight",
+        )
+        plt.savefig(
+            self.result_dir
+            / f"{self.result_name}overlay_isothermal_{isothermal_temp}_{target_mass}m_z.eps",
+            format="eps",
+            dpi=400,
+            bbox_inches="tight",
+        )
+
+    def plot_overlay_dynamic(
+        self,
+        virgin_ps_data_paths,
+        scf3_ps_data_paths,
+        xlim: tuple = (250, 400),
+        ylim: tuple = (0, 110),
+        initial_correction_temp: int = 200,
+    ):
+        """
+        Plots an overlay of all the virgin PS and PS-SCF3 dynamic TGA graphs.
+
+        Args:
+            virgin_ps_data_paths (list): List of tuples [(tga_path, label), ...]
+            scf3_ps_data_paths (list): List of tuples [(tga_path, label), ...]
+            xlim (tuple): X-axis limits
+            ylim (tuple): Y-axis limits
+            initial_correction_temp (int): Temperature correction for initial period
+        """
+
+        fig, ax = plt.subplots(1, figsize=(4, 3.25))
+        plt.subplots_adjust(hspace=0.5)
+
+        # Aesthetics
+        ax.set_xlabel("Temp ($^{o}$C)", fontsize=10)
+        ax.set_ylabel("Mass (%)", fontsize=10)
+
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=10, direction="in")
+
+        # Set limits
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+        ax.set_yticks([0, 20, 40, 60, 80, 100])
+
+        # Generate different shades of #F4BD14 for SCF3 samples
+        base_color = "#F4BD14"
+        scf3_colors = []
+        num_scf3 = len(scf3_ps_data_paths)
+
+        if num_scf3 > 0:
+            # Create variations by adjusting saturation and lightness
+            import matplotlib.colors as mcolors
+
+            base_rgb = mcolors.hex2color(base_color)
+            base_hsv = mcolors.rgb_to_hsv(base_rgb)
+
+            for i in range(num_scf3):
+                # Vary the saturation and value to create different shades
+                saturation_factor = 0.6 + (0.4 * i / max(1, num_scf3 - 1))  # 0.6 to 1.0
+                value_factor = 0.7 + (0.3 * i / max(1, num_scf3 - 1))  # 0.7 to 1.0
+
+                new_hsv = [
+                    base_hsv[0],
+                    base_hsv[1] * saturation_factor,
+                    base_hsv[2] * value_factor,
+                ]
+                new_rgb = mcolors.hsv_to_rgb(new_hsv)
+                scf3_colors.append(mcolors.rgb2hex(new_rgb))
+        # Reverse scf3_colors order
+        scf3_colors.reverse()
+
+        # # Gray colors for virgin PS samples
+        # virgin_colors = ["#808080", "#A0A0A0", "#606060", "#909090", "#707070"]
+
+        # # Plot virgin PS samples in gray
+        # for i, (tga_path, label) in enumerate(virgin_ps_data_paths):
+        #     color = virgin_colors[i % len(virgin_colors)]
+
+        #     # Read and process TGA data
+        #     tga_data = pd.read_csv(
+        #         self.data_dir / tga_path,
+        #         encoding="iso-8859-1",
+        #         on_bad_lines="warn",
+        #         skiprows=37,
+        #     )
+
+        #     # Preprocess data
+        #     tga_data, ms_data = self.preprocess(
+        #         tga_data, None, initial_correction_temp, "Temp"
+        #     )
+
+        #     # Plot TGA data
+        #     ax.plot(
+        #         tga_data["Temp"],
+        #         tga_data["Mass loss/pct"],
+        #         label=f"Virgin PS - {label}",
+        #         color=color,
+        #         linewidth=1.5,
+        #         linestyle="-",
+        #     )
+
+        # Plot PS-SCF3 samples in shades of #F4BD14
+        for i, (tga_path, label) in enumerate(scf3_ps_data_paths):
+            color = scf3_colors[i % len(scf3_colors)]
+
+            # Read and process TGA data
+            tga_data = pd.read_csv(
+                self.data_dir / tga_path,
+                encoding="iso-8859-1",
+                on_bad_lines="warn",
+                skiprows=37,
+            )
+
+            # Preprocess data
+            tga_data, ms_data = self.preprocess(
+                tga_data, None, initial_correction_temp, "Temp"
+            )
+
+            # Plot TGA data
+            ax.plot(
+                tga_data["Temp"],
+                tga_data["Mass loss/pct"],
+                label=f"PS-SCF3 (Mn={label})",
+                color=color,
+                linewidth=1,
+                linestyle="-",
+            )
+
+        # Add legends
+        ax.legend(fontsize=10, loc="best")
+
+        # Save the plots
+        plt.savefig(
+            self.result_dir / f"{self.result_name}overlay_dynamic_tga.png",
+            dpi=400,
+            bbox_inches="tight",
+        )
+        plt.savefig(
+            self.result_dir / f"{self.result_name}overlay_dynamic_tga.eps",
+            format="eps",
+            dpi=400,
+            bbox_inches="tight",
+        )

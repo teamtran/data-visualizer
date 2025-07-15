@@ -25,11 +25,11 @@
         "PS-19.6K": "#969696",
         "PS-40.4K": "#737373",
         "PS-110K": "#525252",
-        "PS-1.12K-SCF3": "#a6bddb",
-        "PS-10K-SCF3": "#74a9cf",
-        "PS-19.6K-SCF3": "#3690c0",
-        "PS-40.4K-SCF3": "#0570b0",
-        "PS-110K-SCF3": "#045a8d",
+        "PS-1.12K-SCF3": "#F4BD14",
+        "PS-10K-SCF3": "#c7e9b4",
+        "PS-19.6K-SCF3": "#7fcdbb",
+        "PS-40.4K-SCF3": "#41b6c4",
+        "PS-110K-SCF3": "#1d91c0",
         "PS-Styrofoam": "#8286ff",
         "PS-Styrofoam-SCF3": "#f5c92a"
     }

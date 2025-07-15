@@ -52,11 +52,11 @@ isothermal_ms_filenames: list = [
 ]
 
 dynamic_filenames: list = [
-    "ExpDat_2025_02_22_PS-F4-dynamic-1K.csv",
+    # "ExpDat_2025_02_22_PS-F4-dynamic-1K.csv",
     "ExpDat_2025_02_27_005d-L4-dynamic-1K.csv",
 ]
 dynamic_ms_filenames: list = [
-    "ExpDat_2025_02_22_PS-F4-dynamic-1K-aeolos.csv",
+    # "ExpDat_2025_02_22_PS-F10-dynamic-1K-aeolos.csv",
     "ExpDat_2025_02_27_005d-L4-dynamic-1K-aeolos.csv",
 ]
 

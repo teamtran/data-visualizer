@@ -75,7 +75,7 @@ class MALDIPlots:
         """
         Plot several TGA isothermal data for comparison (can handle 1 or more).
         """
-        fig, ax = plt.subplots(1, figsize=(6, 6))
+        fig, ax = plt.subplots(1, figsize=(6, 4))
         plt.subplots_adjust(hspace=0.5)
         # aesthetics
         ax.set_xlabel("m/z", fontsize=12)
@@ -109,11 +109,11 @@ class MALDIPlots:
         ax.legend()
         plt.savefig(
             self.result_dir / f"{self.result_name}maldi.png",
-            dpi=400,
+            dpi=300,
         )
         plt.savefig(
             self.result_dir / f"{self.result_name}maldi.svg",
-            dpi=400,
+            dpi=300,
         )
 
     def plot_maldi_zoom(

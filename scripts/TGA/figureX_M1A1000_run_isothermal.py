@@ -85,9 +85,9 @@ if __name__ == "__main__":
     isothermal_tga_plots.plot_tga_isothermal(
         isothermal_temp=300,
         xlim=(0, 1200),
-        ylim=(0, 110),
+        ylim=(0, 100),
         target_mass=104,
-        initial_correction_time=50,
+        initial_correction_time=55,
         uncertainty=False,
         time_for_mass_difference=1200,
     )

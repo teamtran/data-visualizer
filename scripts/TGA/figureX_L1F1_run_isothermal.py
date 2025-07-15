@@ -33,12 +33,12 @@ data_dir: Path = root_path / "data" / "TGA" / experiment_name
 
 # Filenames
 isothermal_filenames: list = [
+    "ExpDat_2025_07_04_SL_PS_Tosoh_F1_isothermal.csv",
     "ExpDat_2025_03_14_SL_005D_L1_isothermal.csv",
-    # "ExpDat_2025_02_25_005d-L3-isothermal-1K.csv",
 ]
 isothermal_ms_filenames: list = [
+    "ExpDat_2025_07_04_SL_PS_Tosoh_F1_isothermal-aeolos.csv",
     "ExpDat_2025_03_14_SL_005D_L1_isothermal-aeolos.csv",
-    # "ExpDat_2025_02_25_005d-L3-isothermal-1K-aeolos.csv",
 ]
 
 dynamic_filenames: list = [
@@ -84,12 +84,12 @@ if __name__ == "__main__":
     # TODO: must change temp and xlimit depending on the isothermal conditions!
     isothermal_tga_plots.plot_tga_isothermal(
         isothermal_temp=300,
-        xlim=(0, 1200),
-        ylim=(0, 110),
+        xlim=(0, 1195),
+        ylim=(0, 100),
         target_mass=104,
-        initial_correction_time=50,
+        initial_correction_time=60,
         uncertainty=False,
-        time_for_mass_difference=1250,
+        time_for_mass_difference=1200,
     )
     # isothermal_tga_plots.plot_ms_peak_area(
     #     "isothermal", 300, initial_time=0, end_time=1500, m_z_start=60, m_z_end=150
