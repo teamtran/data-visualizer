@@ -33,12 +33,12 @@ data_dir: Path = root_path / "data" / "TGA" / experiment_name
 
 # Filenames
 isothermal_filenames: list = [
-    "ExpDat_2025_02_26_PS-F4-isothermal-1K.csv",
-    "ExpDat_2025_02_25_005d-L3-isothermal-1K.csv",
+    "ExpDat_2025_07_20_SL_PS_Tosoh_F4_isothermal.csv",
+    "ExpDat_2025_07_19_SL_PS_005d-L3_isothermal.csv",
 ]
 isothermal_ms_filenames: list = [
-    "ExpDat_2025_02_26_PS-F4-isothermal-1K-aeolos.csv",
-    "ExpDat_2025_02_25_005d-L3-isothermal-1K-aeolos.csv",
+    "ExpDat_2025_07_20_SL_PS_Tosoh_F4_isothermal-aeolos.csv",
+    "ExpDat_2025_07_19_SL_PS_005d-L3_isothermal-aeolos.csv",
 ]
 
 dynamic_filenames: list = [
@@ -68,7 +68,7 @@ dynamic_ms_filenames: list = [
 
 # labels: list = ["PS-SCF3-1K_min", "PS-6.1K-1K_min"]
 labels: list = ["PS-40.4K", "PS-40.4K-SCF3"]
-colors: list = [style["color"][labels[0]], style["color"][labels[1]]]
+colors: list = ["#A0A0A0", "#ffcc02"]
 labels[1] = "PS-40.4K-SCF$_{3}$"
 
 if __name__ == "__main__":

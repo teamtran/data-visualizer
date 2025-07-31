@@ -202,13 +202,13 @@ class PhotophysicalPlots:
                 uv_vis_data[uv_vis_expt_name + "_wavelength"],  # x-axis
                 uv_vis_data[uv_vis_expt_name + "_avg"],  # y-axis
                 label=label,
-                color=self.style["color"][color],
+                color=color,
             )
             ax2.plot(
                 pl_data[pl_expt_name + "_wavelength"],  # x-axis
                 pl_data[pl_expt_name + "_avg"],  # y-axis
                 label=label,
-                color=self.style["color"][color],
+                color=color,
                 linestyle="--",  # https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
             )
             i += 1
@@ -222,7 +222,12 @@ class PhotophysicalPlots:
         ax.set_ylim(ylim)
         ax.add_artist(legend)
 
-        plt.savefig(self.result_dir / f"{self.result_name}uv_vis_and_pl.png", dpi=400)
+        plt.savefig(self.result_dir / f"{self.result_name}uv_vis_and_pl.png", dpi=300)
+        plt.savefig(
+            self.result_dir / f"{self.result_name}uv_vis_and_pl.eps",
+            format="eps",
+            dpi=300,
+        )
 
     def plot_uv_vis(
         self,
@@ -245,6 +250,16 @@ class PhotophysicalPlots:
         ax.tick_params(
             axis="both", which="major", labelsize=self.style["fontsize"], direction="in"
         )
+
+        # Set custom y-axis ticks (0, 0.5, 1.0)
+        ax.set_yticks([0, 0.5, 1.0])
+
+        # Set custom x-axis ticks with intervals of 100
+        x_start = int(xlim[0] // 100) * 100  # Round down to nearest 100
+        x_end = int(xlim[1] // 100 + 1) * 100  # Round up to nearest 100
+        x_ticks = range(x_start, x_end + 1, 100)
+        ax.set_xticks(x_ticks)
+
         i = 0
         uv_vis_data, pl_data = self.preprocess(drop_columns, normalize, baseline, xlim)
 
@@ -257,7 +272,7 @@ class PhotophysicalPlots:
                 uv_vis_data[uv_vis_expt_name + "_wavelength"],  # x-axis
                 uv_vis_data[uv_vis_expt_name + "_avg"],  # y-axis
                 label=label,
-                color=self.style["color"][color],
+                color=color,
             )
             i += 1
         legend = ax.legend(
@@ -270,7 +285,10 @@ class PhotophysicalPlots:
         ax.set_ylim(ylim)
         ax.add_artist(legend)
 
-        plt.savefig(self.result_dir / f"{self.result_name}uv_vis.png", dpi=400)
+        plt.savefig(self.result_dir / f"{self.result_name}uv_vis.png", dpi=300)
+        plt.savefig(
+            self.result_dir / f"{self.result_name}uv_vis.eps", format="eps", dpi=300
+        )
 
     def plot_pl(
         self,
@@ -305,7 +323,7 @@ class PhotophysicalPlots:
                 pl_data[pl_expt_name + "_wavelength"],  # x-axis
                 pl_data[pl_expt_name + "_avg"],  # y-axis
                 label=label,
-                color=self.style["color"][color],
+                color=color,
                 linestyle="--",  # https://matplotlib.org/stable/gallery/lines_bars_and_markers/linestyles.html
             )
             i += 1
@@ -319,4 +337,7 @@ class PhotophysicalPlots:
         ax.set_ylim(ylim)
         ax.add_artist(legend)
 
-        plt.savefig(self.result_dir / f"{self.result_name}pl.png", dpi=400)
+        plt.savefig(self.result_dir / f"{self.result_name}pl.png", dpi=300)
+        plt.savefig(
+            self.result_dir / f"{self.result_name}pl.eps", format="eps", dpi=300
+        )

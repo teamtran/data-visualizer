@@ -39,25 +39,25 @@ uv_vis_experiment_names: list[str] = [
     "0.05mg_mL_4CzIPN",
     "0.965mg_mL_PS_6_1K",
     "1.09mg_mL_005d-B1-FLASH",
-    "0.985mg_mL_005d-B1-rGPC",
-    "0.95mg_mL_005d-B1-toyopearls",
+    # "0.985mg_mL_005d-B1-rGPC",
+    # "0.95mg_mL_005d-B1-toyopearls",
 ]
 photoluminescence_experiment_names: list[str] = [
     "0.05mg_mL_4CzIPN",
     "0.965mg_mL_PS_6_1K",
-    "1.09mg_mL_005d-B1-FLASH",
-    "0.985mg_mL_005d-B1-rGPC",
-    "0.95mg_mL_005d-B1-toyopearls",
+    # "1.09mg_mL_005d-B1-FLASH",
+    # "0.985mg_mL_005d-B1-rGPC",
+    # "0.95mg_mL_005d-B1-toyopearls",
 ]
 
 labels: list = [
     "4CzIPN",
-    "PS_6.4K",
+    "PS",
     "PS-SCF3-FLASH",
-    "PS-SCF3-rGPC",
-    "PS-SCF3-Toyopearls",
+    # "PS-SCF3-rGPC",
+    # "PS-SCF3-Toyopearls",
 ]
-colors = ["yellow", "blue", "dark_yellow", "green_blue_3", "green_blue_5"]
+colors = []
 
 if __name__ == "__main__":
     uv_vis_plots = PhotophysicalPlots(

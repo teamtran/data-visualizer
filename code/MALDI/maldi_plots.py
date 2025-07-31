@@ -174,11 +174,12 @@ class MALDIPlots:
         ax.legend(loc="upper center")
         plt.savefig(
             self.result_dir / f"{self.result_name}maldi_zoom_{xlim[0]}-{xlim[1]}.png",
-            dpi=400,
+            dpi=300,
         )
         plt.savefig(
-            self.result_dir / f"{self.result_name}maldi_zoom_{xlim[0]}-{xlim[1]}.svg",
-            dpi=400,
+            self.result_dir / f"{self.result_name}maldi_zoom_{xlim[0]}-{xlim[1]}.eps",
+            format="eps",
+            dpi=300,
         )
 
     def plot_maldi_zoom_with_inset(

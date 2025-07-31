@@ -78,7 +78,7 @@ class GPCPlots:
         """
         Function that plots GPC data.
         """
-        fig, ax = plt.subplots(figsize=(7, 5))
+        fig, ax = plt.subplots(figsize=(4, 3.25))
         plt.tight_layout(pad=3)
         # aesthetics
         ax.set_xlabel("Retention Time (min)", fontsize=12)
@@ -153,8 +153,10 @@ class GPCPlots:
                 fontsize=8,
             )
         ax.add_artist(legend)
-        plt.savefig(self.result_dir / f"{self.result_name}gpc_plot.png", dpi=600)
-        plt.savefig(self.result_dir / f"{self.result_name}gpc_plot.svg", dpi=600)
+        plt.savefig(self.result_dir / f"{self.result_name}gpc_plot.png", dpi=300)
+        plt.savefig(
+            self.result_dir / f"{self.result_name}gpc_plot.eps", format="eps", dpi=300
+        )
 
         # Save intensiy data
         intensity_at_rt_df = pd.DataFrame.from_dict(intensity_at_rt, orient="index")

@@ -352,31 +352,35 @@ class TGAPlots:
         end_time: float = 1450,
         m_z_start: int = 60,
         m_z_end: int = 150,
-        normalize: bool = True,
+        normalize: bool = False,
+        alpha_list: list[float] = [0.8, 0.5],
     ):
         """
         Plot the peak area for each m/z over time.
         x-axis: m/z
         y-axis: peak area from time 0 to time x.
         """
-        fig, ax = plt.subplots(1, figsize=(8, 6))
+        fig, ax = plt.subplots(1, figsize=(4, 3.25))
         # aesthetics
-        ax.set_xlabel("m/z", fontsize=10)
+        ax.set_xlabel("m/z", fontsize=5)
         ax.set_ylabel(
-            "Normalized Peak Area of Ion Current over Time (A x min)", fontsize=10
+            "Normalized Peak Area of Ion Current over Time (A x min)", fontsize=5
         )
-        if tga_type == "isothermal":
-            ax.set_title(
-                f"Normalized Peak Area for m/z {m_z_start} to {m_z_end} for {tga_type} TGA-MS data at {isothermal_temp}°C"
-            )
-        else:
-            ax.set_title(
-                f"Normalized Peak Area for m/z {m_z_start} to {m_z_end} for {tga_type} TGA-MS data"
-            )
+        # if tga_type == "isothermal":
+        #     ax.set_title(
+        #         f"Normalized Peak Area for m/z {m_z_start} to {m_z_end} for {tga_type} TGA-MS data at {isothermal_temp}°C",
+        #         fontsize=5,
+        #     )
+        # else:
+        #     ax.set_title(
+        #         f"Normalized Peak Area for m/z {m_z_start} to {m_z_end} for {tga_type} TGA-MS data"
+        #     )
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.tick_params(axis="both", which="major", labelsize=8, direction="in")
-        for ms_path, label, color in zip(self.ms_data_path, self.labels, self.colors):
+        ax.tick_params(axis="both", which="major", labelsize=5, direction="in")
+        for ms_path, label, color, alpha in zip(
+            self.ms_data_path, self.labels, self.colors, alpha_list
+        ):
             ms_data = pd.read_csv(
                 self.data_dir / ms_path,
                 encoding="iso-8859-1",
@@ -394,26 +398,38 @@ class TGAPlots:
             peak_area = ms_data.iloc[:, m_z_start_idx:m_z_end_idx].sum(axis=0)
             if normalize:
                 peak_area = peak_area / peak_area.max()
-            ax.plot(
+            # ax.plot(
+            #     range(m_z_start, m_z_end),
+            #     peak_area,
+            #     label=label,
+            #     color=color,
+            #     marker="o",
+            #     markersize=0.5,
+            #     alpha=0.6,
+            #     linewidth=0.5,
+            # )
+            ax.vlines(
                 range(m_z_start, m_z_end),
+                0,
                 peak_area,
+                colors=color,
+                alpha=alpha,
+                linewidth=0.5,
                 label=label,
-                color=color,
-                marker="o",
-                markersize=2,
             )
         # label all the points with m/z that are above 10% of the max peak area
         for i, txt in enumerate(peak_area):
-            if txt > 0.05 * peak_area.max():
+            if txt > 0.1 * peak_area.max():
                 ax.annotate(
                     f"{range(m_z_start, m_z_end)[i]}",
                     (range(m_z_start, m_z_end)[i], peak_area[i]),
                     textcoords="offset points",
                     xytext=(0, 5),
                     ha="center",
+                    fontsize=5,
                 )
 
-        ax.legend()
+        ax.legend(fontsize=5)
         plt.savefig(
             self.result_dir
             / f"{self.result_name}ms_peak_area_{m_z_start}_{m_z_end}_{isothermal_temp}.png",
@@ -421,7 +437,8 @@ class TGAPlots:
         )
         plt.savefig(
             self.result_dir
-            / f"{self.result_name}ms_peak_area_{m_z_start}_{m_z_end}_{isothermal_temp}.svg",
+            / f"{self.result_name}ms_peak_area_{m_z_start}_{m_z_end}_{isothermal_temp}.eps",
+            format="eps",
             dpi=400,
         )
 
@@ -495,7 +512,9 @@ class TGAPlots:
             onset_temp,
         )
 
-    def plot_onset_temperature_vs_mn(self, summary_dir):
+    def plot_onset_temperature_vs_mn(
+        self, summary_dir, ylim=(315, 375), xlim=(-10, 100)
+    ):
         """
         Plot dynamic onset temperature vs molecular weight for PS samples
         with and without SCF3 functionalization.
@@ -519,39 +538,41 @@ class TGAPlots:
         df_pristine_onset = df_pristine.dropna(subset=["mn", "dynamic_onset_t"])
         df_func_onset = df_functionalized.dropna(subset=["mn", "dynamic_onset_t"])
 
-        # Create the plot
-        fig, ax = plt.subplots(figsize=(6, 6))
+        # Create the plot with matching style
+        fig, ax = plt.subplots(1, figsize=(3.5, 3))
+        plt.subplots_adjust(hspace=0.5)
+
+        # Aesthetics matching plot_tga_isothermal
+        ax.set_xlabel("Molecular Weight (Mn) [kg/mol]", fontsize=10)
+        ax.set_ylabel("Dynamic Onset Temperature [°C]", fontsize=10)
+        ax.set_ylim(ylim)
+        ax.set_xlim(xlim)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=8, direction="in")
 
         # Plot onset temperature data
         ax.scatter(
             df_pristine_onset["mn"],
             df_pristine_onset["dynamic_onset_t"],
-            color="red",
+            color="#A0A0A0",
             marker="o",
-            s=80,
             alpha=0.7,
             label="Pristine PS",
-            edgecolors="darkred",
             linewidth=1,
         )
 
         ax.scatter(
             df_func_onset["mn"],
             df_func_onset["dynamic_onset_t"],
-            color="blue",
-            marker="s",
-            s=80,
+            color="#F4BD14",
+            marker="o",
             alpha=0.7,
             label="PS-SCF3",
-            edgecolors="darkblue",
             linewidth=1,
         )
 
-        # Formatting
-        ax.set_xlabel("Molecular Weight (Mn) [kg/mol]", fontsize=12)
-        ax.set_ylabel("Dynamic Onset Temperature [°C]", fontsize=12)
-        ax.set_title("Dynamic Onset Temperature vs Molecular Weight", fontsize=14)
-        ax.grid(True, alpha=0.3)
+        # Legend with matching fontsize
         ax.legend(fontsize=10)
 
         # Adjust layout
@@ -568,132 +589,7 @@ class TGAPlots:
             dpi=400,
         )
 
-    def plot_delta_mass_loss_vs_mn(self, summary_dir):
-        """
-        Plot delta isothermal mass loss (SCF3 - Pristine) vs molecular weight
-        for PS samples, using the Mn of the pristine PS as the x-axis.
-
-        Parameters:
-        summary_dir (str): Directory containing the mn_summary.csv file
-
-        Returns:
-        None: Displays the plot
-        """
-
-        # Read the CSV file
-        csv_path = self.data_dir / summary_dir
-        df = pd.read_csv(csv_path)
-
-        # Separate data into functionalized and non-functionalized samples
-        df_pristine = df[~df["name"].str.contains("SCF3", na=False)]
-        df_functionalized = df[df["name"].str.contains("SCF3", na=False)]
-
-        # Clean data for mass loss (remove NaN values)
-        df_pristine_mass = df_pristine.dropna(
-            subset=["mn", "isothermal_mass_loss_after_1200mins"]
-        )
-        df_func_mass = df_functionalized.dropna(
-            subset=["mn", "isothermal_mass_loss_after_1200mins"]
-        )
-
-        # Calculate delta mass loss for matched samples
-        delta_data = []
-
-        for _, pristine_row in df_pristine_mass.iterrows():
-            # Find matching SCF3 sample (you may need to adjust this matching logic
-            # based on your sample naming convention)
-            pristine_name = pristine_row["name"]
-
-            # Look for corresponding SCF3 sample
-            # Assuming SCF3 samples have similar base names with "SCF3" added
-            matching_scf3 = df_func_mass[
-                df_func_mass["name"].str.contains(
-                    pristine_name.replace("_pristine", "").replace("pristine", ""),
-                    na=False,
-                )
-            ]
-
-            if not matching_scf3.empty:
-                # If multiple matches, take the first one (you may want to refine this)
-                scf3_row = matching_scf3.iloc[0]
-
-                # Calculate delta (SCF3 - Pristine)
-                delta_mass_loss = (
-                    scf3_row["isothermal_mass_loss_after_1200mins"]
-                    - pristine_row["isothermal_mass_loss_after_1200mins"]
-                )
-
-                delta_data.append(
-                    {
-                        "mn_pristine": pristine_row["mn"],
-                        "delta_mass_loss": delta_mass_loss,
-                        "pristine_name": pristine_name,
-                        "scf3_name": scf3_row["name"],
-                    }
-                )
-
-        # Convert to DataFrame for easier handling
-        delta_df = pd.DataFrame(delta_data)
-
-        if delta_df.empty:
-            print(
-                "No matching SCF3/Pristine sample pairs found. Please check sample naming convention."
-            )
-            return
-
-        # Create the plot
-        fig, ax = plt.subplots(figsize=(8, 6))
-
-        # Plot delta mass loss data
-        ax.scatter(
-            delta_df["mn_pristine"],
-            delta_df["delta_mass_loss"],
-            color="green",
-            marker="o",
-            s=80,
-            alpha=0.7,
-            label="Δ Mass Loss (SCF3 - Pristine)",
-            edgecolors="darkgreen",
-            linewidth=1,
-        )
-
-        # Add a horizontal line at y=0 for reference
-        ax.axhline(y=0, color="black", linestyle="--", alpha=0.5, linewidth=1)
-
-        # Formatting
-        ax.set_xlabel("Molecular Weight (Mn) of Pristine PS [kg/mol]", fontsize=12)
-        ax.set_ylabel("Δ Isothermal Mass Loss after 1200 mins [%]", fontsize=12)
-        ax.set_title(
-            "Delta Mass Loss (SCF3 - Pristine) vs Molecular Weight", fontsize=14
-        )
-        ax.grid(True, alpha=0.3)
-        ax.legend(fontsize=10)
-
-        # Add text annotation showing number of data points
-        ax.text(
-            0.02,
-            0.98,
-            f"n = {len(delta_df)} sample pairs",
-            transform=ax.transAxes,
-            fontsize=10,
-            verticalalignment="top",
-            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
-        )
-
-        # Adjust layout
-        plt.tight_layout()
-
-        # Save the plot
-        plt.savefig(
-            self.result_dir / f"summary_plots_delta_mass_loss_vs_mn.png",
-            dpi=400,
-        )
-        plt.savefig(
-            self.result_dir / f"summary_plots_delta_mass_loss_vs_mn.svg",
-            dpi=400,
-        )
-
-    def plot_mass_loss_vs_mn(self, summary_dir):
+    def plot_mass_loss_vs_mn(self, summary_dir, ylim=(20, 80), xlim=(-10, 100)):
         """
         Plot isothermal mass loss vs molecular weight for PS samples
         with and without SCF3 functionalization.
@@ -721,39 +617,41 @@ class TGAPlots:
             subset=["mn", "isothermal_mass_loss_after_1200mins"]
         )
 
-        # Create the plot
-        fig, ax = plt.subplots(figsize=(8, 6))
+        # Create the plot with matching style
+        fig, ax = plt.subplots(1, figsize=(3.5, 3))
+        plt.subplots_adjust(hspace=0.5)
+
+        # Aesthetics matching plot_tga_isothermal
+        ax.set_xlabel("Molecular Weight (Mn) [kg/mol]", fontsize=10)
+        ax.set_ylabel("Isothermal Mass Loss after 1200 mins [%]", fontsize=10)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=8, direction="in")
+        ax.set_ylim(ylim)
+        ax.set_xlim(xlim)
 
         # Plot mass loss data
         ax.scatter(
             df_pristine_mass["mn"],
             df_pristine_mass["isothermal_mass_loss_after_1200mins"],
-            color="red",
+            color="#A0A0A0",
             marker="o",
-            s=80,
             alpha=0.7,
             label="Pristine PS",
-            edgecolors="darkred",
             linewidth=1,
         )
 
         ax.scatter(
             df_func_mass["mn"],
             df_func_mass["isothermal_mass_loss_after_1200mins"],
-            color="blue",
-            marker="s",
-            s=80,
+            color="#F4BD14",
+            marker="o",
             alpha=0.7,
             label="PS-SCF3",
-            edgecolors="darkblue",
             linewidth=1,
         )
 
-        # Formatting
-        ax.set_xlabel("Molecular Weight (Mn) [kg/mol]", fontsize=12)
-        ax.set_ylabel("Isothermal Mass Loss after 1200 mins [%]", fontsize=12)
-        ax.set_title("Isothermal Mass Loss vs Molecular Weight", fontsize=14)
-        ax.grid(True, alpha=0.3)
+        # Legend with matching fontsize
         ax.legend(fontsize=10)
 
         # Adjust layout
@@ -766,6 +664,175 @@ class TGAPlots:
         )
         plt.savefig(
             self.result_dir / f"summary_plots_mass_loss_vs_mn.eps",
+            format="eps",
+            dpi=400,
+        )
+
+    def plot_onset_temperature_vs_percent_functionalization(
+        self, summary_dir, ylim=(310, 360), xlim=(-0.5, 6)
+    ):
+        """∂
+        Plot dynamic onset temperature vs percent functionalization for PS samples
+        with and without SCF3 functionalization.
+
+        Parameters:
+        summary_dir (str): Directory containing the mn_summary.csv file
+
+        Returns:
+        None: Displays the plot
+        """
+
+        # Read the CSV file
+        csv_path = self.data_dir / summary_dir
+        df = pd.read_csv(csv_path)
+
+        # Separate data into functionalized and non-functionalized samples
+        df_pristine = df[~df["name"].str.contains("SCF3", na=False)]
+        df_functionalized = df[df["name"].str.contains("SCF3", na=False)]
+
+        print(df_functionalized)
+
+        # Clean data for onset temperature (remove NaN values)
+        df_pristine_onset = df_pristine.dropna(
+            subset=["percent_functionalization", "dynamic_onset_t"]
+        )
+        df_func_onset = df_functionalized.dropna(
+            subset=["percent_functionalization", "dynamic_onset_t"]
+        )
+
+        print(df_func_onset)
+
+        # Create the plot with matching style
+        fig, ax = plt.subplots(1, figsize=(3.5, 3))
+        plt.subplots_adjust(hspace=0.5)
+
+        # Aesthetics matching plot_tga_isothermal
+        ax.set_xlabel("Percent Functionalization [%]", fontsize=10)
+        ax.set_ylabel("Dynamic Onset Temperature [°C]", fontsize=10)
+        ax.set_ylim(ylim)
+        ax.set_xlim(xlim)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=8, direction="in")
+
+        # Plot onset temperature data
+        ax.scatter(
+            df_pristine_onset["percent_functionalization"],
+            df_pristine_onset["dynamic_onset_t"],
+            color="#A0A0A0",
+            marker="o",
+            alpha=0.7,
+            label="Pristine PS",
+            linewidth=1,
+        )
+
+        ax.scatter(
+            df_func_onset["percent_functionalization"],
+            df_func_onset["dynamic_onset_t"],
+            color="#F4BD14",
+            marker="o",
+            alpha=0.7,
+            label="PS-SCF3",
+            linewidth=1,
+        )
+
+        # Legend with matching fontsize
+        ax.legend(fontsize=10)
+
+        # Adjust layout
+        plt.tight_layout()
+
+        # Save the plot
+        plt.savefig(
+            self.result_dir / f"onset_temperature_vs_percent_functionalization.png",
+            dpi=400,
+        )
+        plt.savefig(
+            self.result_dir / f"onset_temperature_vs_percent_functionalization.eps",
+            format="eps",
+            dpi=400,
+        )
+
+    def plot_mass_loss_vs_percent_functionalization(
+        self, summary_dir, ylim=(40, 80), xlim=(-0.5, 6)
+    ):
+        """
+        Plot isothermal mass loss vs percent functionalization for PS samples
+        with and without SCF3 functionalization.
+
+        Parameters:
+        summary_dir (str): Directory containing the mn_summary.csv file
+
+        Returns:
+        None: Displays the plot
+        """
+
+        # Read the CSV file
+        csv_path = self.data_dir / summary_dir
+        df = pd.read_csv(csv_path)
+
+        # Separate data into functionalized and non-functionalized samples
+        df_pristine = df[~df["name"].str.contains("SCF3", na=False)]
+        df_functionalized = df[df["name"].str.contains("SCF3", na=False)]
+
+        # Clean data for mass loss (remove NaN values)
+        df_pristine_mass = df_pristine.dropna(
+            subset=["percent_functionalization", "isothermal_mass_loss_after_1200mins"]
+        )
+        df_func_mass = df_functionalized.dropna(
+            subset=["percent_functionalization", "isothermal_mass_loss_after_1200mins"]
+        )
+
+        # Create the plot with matching style
+        fig, ax = plt.subplots(1, figsize=(3.5, 3))
+        plt.subplots_adjust(hspace=0.5)
+
+        # Aesthetics matching plot_tga_isothermal
+        ax.set_xlabel("Percent Functionalization [%]", fontsize=10)
+        ax.set_ylabel("Isothermal Mass Loss after 1200 mins [%]", fontsize=10)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=8, direction="in")
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+        ax.set_yticks(range(int(ylim[0]), int(ylim[1]) + 1, 10))
+
+        # Plot mass loss data
+        ax.scatter(
+            df_pristine_mass["percent_functionalization"],
+            df_pristine_mass["isothermal_mass_loss_after_1200mins"],
+            color="#A0A0A0",
+            marker="o",
+            alpha=0.7,
+            label="Pristine PS",
+            linewidth=1,
+        )
+
+        ax.scatter(
+            df_func_mass["percent_functionalization"],
+            df_func_mass["isothermal_mass_loss_after_1200mins"],
+            color="#F4BD14",
+            marker="o",
+            alpha=0.7,
+            label="PS-SCF3",
+            linewidth=1,
+        )
+
+        # Legend with matching fontsize
+        ax.legend(fontsize=10)
+
+        # Adjust layout
+        plt.tight_layout()
+
+        # Save the plot
+        plt.savefig(
+            self.result_dir
+            / f"summary_plots_mass_loss_vs_percent_functionalization.png",
+            dpi=400,
+        )
+        plt.savefig(
+            self.result_dir
+            / f"summary_plots_mass_loss_vs_percent_functionalization.eps",
             format="eps",
             dpi=400,
         )
@@ -949,7 +1016,7 @@ class TGAPlots:
         virgin_ps_data_paths,
         scf3_ps_data_paths,
         xlim: tuple = (250, 400),
-        ylim: tuple = (0, 110),
+        ylim: tuple = (0, 105),
         initial_correction_temp: int = 200,
     ):
         """

@@ -1,1 +1,4 @@
-name,mn,percent_functionalization,isothermal_mass_loss_after_1200mins,dynamic_onset_t
+exp_id,name,mn,percent_functionalization,isothermal_mass_loss_after_1200mins,dynamic_onset_t
+PS-1.12K,PS-1.12K,,0,43.1,350.7
+005f-J1,PS-SCF3,,3.21,59.8,329.5
+005f-J3,PS-SCF3,,5.33,77.03,323.4

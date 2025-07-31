@@ -52,11 +52,11 @@ isothermal_ms_filenames: list = [
 ]
 
 dynamic_filenames: list = [
-    # "ExpDat_2025_02_22_PS-F4-dynamic-1K.csv",
+    "ExpDat_2025_07_17_SL_PS_Tosoh_F10_dynamic.csv",
     "ExpDat_2025_02_27_005d-L4-dynamic-1K.csv",
 ]
 dynamic_ms_filenames: list = [
-    # "ExpDat_2025_02_22_PS-F10-dynamic-1K-aeolos.csv",
+    "ExpDat_2025_07_17_SL_PS_Tosoh_F10_dynamic-aeolos.csv",
     "ExpDat_2025_02_27_005d-L4-dynamic-1K-aeolos.csv",
 ]
 
@@ -68,7 +68,7 @@ labels: list = ["PS-110K", "PS-110K-SCF3"]
 # labels: list = ["PS-19.6K", "PS-19.6K-SCF3"]
 # labels: list = ["PS-40.4K", "PS-40.4K-SCF3"]
 # labels: list = ["PS-110K", "PS-110K-SCF3"]
-colors = [style["color"][labels[0]], style["color"][labels[1]]]
+colors = ["#A0A0A0", "#ffcc02"]
 labels[1] = "PS-110K-SCF$_{3}$"
 
 if __name__ == "__main__":
@@ -106,6 +106,6 @@ if __name__ == "__main__":
     dynamic_tga_plots.plot_tga_dynamic(
         t_depolymerization_cutoff=99.5,
         target_mass=104,
-        xlim=(250, 400),
-        initial_correction_temp=250,
+        xlim=(300, 400),
+        initial_correction_temp=300,
     )
