@@ -162,6 +162,164 @@ class LCMSPlots:
             self.result_dir / f"{self.result_name}intensity_at_rt.csv"
         )
 
+    def plot_stacked_lcms(
+        self,
+        lcms_metadata: list[str] = None,
+        xlim: tuple = None,
+        vertical_spacing: float = 0.5,
+        nm: float = 380,
+        show_legend: bool = True,
+        normalize_individual: bool = True,
+    ):
+        """
+        Function that plots LCMS data as stacked chromatograms with shared x-axis.
+
+        Parameters:
+        -----------
+        lcms_metadata : list[str], optional
+            Metadata labels for each chromatogram
+        xlim : tuple, optional
+            X-axis limits (min_time, max_time)
+        vertical_spacing : float, default=0.3
+            Vertical spacing between stacked chromatograms
+        nm : float, default=230
+            Wavelength for the y-axis label
+        show_legend : bool, default=True
+            Whether to show the legend
+        normalize_individual : bool, default=True
+            Whether to normalize each chromatogram individually to [0,1]
+        """
+        fig, ax = plt.subplots(figsize=(10, 2 + len(self.lcms_data_path) * 1.5))
+        plt.tight_layout(pad=3)
+
+        # Aesthetics
+        ax.set_xlabel("Retention Time (min)", fontsize=12)
+        ax.set_ylabel(f"Chromatograms at λ={nm}nm", fontsize=12)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=12, direction="in")
+
+        y_positions = []  # Store y-positions for each chromatogram
+        max_intensity_global = 0  # For global normalization if needed
+
+        # First pass: determine global max if not normalizing individually
+        if not normalize_individual:
+            for lcms_file in self.lcms_data_path:
+                lcms_data = pd.read_csv(self.data_dir / lcms_file, skiprows=1, sep=",")
+                current_max = lcms_data[lcms_data.columns[1]].max()
+                max_intensity_global = max(max_intensity_global, current_max)
+
+        # Plot each chromatogram
+        for i, (lcms_file, label, color) in enumerate(
+            zip(self.lcms_data_path, self.labels, self.colors)
+        ):
+            lcms_data = pd.read_csv(self.data_dir / lcms_file, skiprows=1, sep=",")
+
+            # Normalize data
+            if normalize_individual:
+                # Normalize each chromatogram to [0,1]
+                normalized_intensity = (
+                    lcms_data[lcms_data.columns[1]]
+                    / lcms_data[lcms_data.columns[1]].max()
+                )
+            else:
+                # Use global normalization
+                normalized_intensity = (
+                    lcms_data[lcms_data.columns[1]] / max_intensity_global
+                )
+
+            # Calculate vertical offset for stacking
+            y_offset = i * vertical_spacing
+            y_positions.append(y_offset)
+
+            # Plot the chromatogram
+            ax.plot(
+                lcms_data[lcms_data.columns[0]],
+                normalized_intensity + y_offset,
+                label=label,
+                color=color,
+                linewidth=1.0,
+            )
+
+            # Add a horizontal baseline for each chromatogram
+            if xlim:
+                baseline_x = xlim
+            else:
+                baseline_x = (
+                    lcms_data[lcms_data.columns[0]].min(),
+                    lcms_data[lcms_data.columns[0]].max(),
+                )
+
+            ax.plot(
+                baseline_x,
+                [y_offset, y_offset],
+                color="gray",
+                linewidth=0.5,
+                alpha=0.5,
+                linestyle="--",
+            )
+
+            # Add label on the left side of each chromatogram
+            ax.text(
+                -0.02,
+                y_offset + 0.5,
+                label,
+                transform=ax.get_yaxis_transform(),
+                horizontalalignment="right",
+                verticalalignment="center",
+                fontsize=10,
+                color=color,
+                weight="bold",
+            )
+
+        # Set axis limits
+        if xlim:
+            ax.set_xlim(xlim)
+
+        # Set y-axis limits with some padding
+        y_min = -0.1
+        y_max = max(y_positions) + 1.2
+        ax.set_ylim(y_min, y_max)
+
+        # Customize y-axis - remove ticks since they're not meaningful for stacked plot
+        ax.set_yticks([])
+
+        # Add legend if requested
+        if show_legend:
+            legend = ax.legend(
+                loc="upper right",
+                frameon=False,
+                title="Chromatograms",
+                fontsize=10,
+            )
+
+        # Add metadata legend if provided
+        if lcms_metadata and lcms_metadata != []:
+            legend_handles = ax.get_legend_handles_labels()[0]
+            lcms_legend = (legend_handles, lcms_metadata)
+            lcms_metadata_legend = ax.legend(
+                lcms_legend[0],
+                labels=lcms_metadata,
+                loc="center right",
+                frameon=False,
+                title="LCMS Data",
+                fontsize=8,
+            )
+            if show_legend:
+                ax.add_artist(legend)
+
+        # Save the plot
+        plt.savefig(
+            self.result_dir / f"{self.result_name}stacked_lcms_plot.png",
+            dpi=600,
+            bbox_inches="tight",
+        )
+        plt.savefig(
+            self.result_dir / f"{self.result_name}stacked_lcms_plot.svg",
+            dpi=600,
+            bbox_inches="tight",
+        )
+
 
 class LCMS_LinearCalibration_Plots:
     def __init__(

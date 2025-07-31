@@ -2,12 +2,14 @@ from pathlib import Path
 import sys
 from matplotlib import pyplot as plt
 import json
+import pandas as pd
+import numpy as np
 
 # sets the path to the root of the repository
 root_path = Path(__file__).parent.parent.parent.resolve()
 sys.path.insert(0, str(root_path))
 
-from code.LCMS.lcms_plots import LCMS_LinearCalibration_Plots
+from code.LCMS.lcms_plots import LCMSPlots
 
 # Style path
 style_path: Path = root_path / "style" / "style.json"
@@ -18,10 +20,8 @@ plt.rcParams["font.family"] = style["fontfamily"]
 plt.rcParams["font.size"] = style["fontsize"]
 plt.rcParams["axes.linewidth"] = style["axes_linewidth"]
 
-# TODO: Change experiment name and filenames
-# LCMS Curves
-# Experiment Name
-experiment_name: str = "005b-D"
+# Example with multiple chromatograms for stacking
+experiment_name: str = "AL"
 
 # Result path
 result_path: Path = root_path / "results" / "LCMS" / experiment_name
@@ -29,19 +29,44 @@ result_path: Path = root_path / "results" / "LCMS" / experiment_name
 # Data directory path
 data_dir: Path = root_path / "data" / "LCMS" / experiment_name
 
-# Filenames
-lcms_filename: str = "isopropylbenzene-SCF3-linear-calibration.csv"
+# For stacked plot - multiple files example
+lcms_filenames = [
+    "2025-07-30-AL-1-TIT.dx_DAD1B.CSV",
+    # Add more files here for stacking
+    "2025-07-30-AL-1-65A-bTEG-PPP.dx_DAD1B.CSV",
+    "2025-07-21-SL-AL-1-66B-run-Bperc-10--90--10.dx_DAD1B.CSV",
+    # "2025-07-30-AL-2-sample.dx_DAD1B.CSV",
+    # "2025-07-30-AL-3-control.dx_DAD1B.CSV",
+]
 
-label = "Isopropylbenzene-SCF$_3$-Bpin"
+labels = ["TIT", "DPP", "Degraded DPP-TIT"]  # Add corresponding labels
+colors = ["#8286ff", "#5445ff", "#1004ff"]  # Add corresponding colors
 
 if __name__ == "__main__":
-    lcms_linear_cal_plot = LCMS_LinearCalibration_Plots(
+    # Note: Updated parameter names to match your class definition
+    lcms_plot = LCMSPlots(
         data_dir=data_dir,
-        lcms_filename=lcms_filename,
-        label=label,
-        color="#8286ff",
+        lcms_data_path=lcms_filenames,  # Note: parameter name from class def
+        labels=labels,  # Note: parameter name from class def
+        colors=colors,  # Note: parameter name from class def
         result_dir=result_path,
         style_path=style_path,
-        nm=230,
     )
-    lcms_linear_cal_plot.plot_calibration_curve()
+
+    # Use the new stacked plot function
+    lcms_plot.plot_stacked_lcms(
+        xlim=(0, 15),  # Adjust as neededs
+        vertical_spacing=1.4,  # Adjust spacing between chromatograms
+        nm=380,
+        show_legend=True,
+        normalize_individual=True,  # Each chromatogram normalized to [0,1]
+    )
+
+# For multiple chromatograms example:
+# lcms_filenames = [
+#     "sample1.CSV",
+#     "sample2.CSV",
+#     "sample3.CSV"
+# ]
+# labels = ["Sample 1", "Sample 2", "Sample 3"]
+# colors = ["#8286ff", "#ff6b6b", "#4ecdc4"]
