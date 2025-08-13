@@ -31,35 +31,42 @@ data_dir: Path = root_path / "data" / "GCMS" / experiment_name
 
 # Filenames
 gcms_lin_cal_filename: str = "isopropylbenzene-SCF3-linear-calibration.csv"
-# gcms_filename: str = [
-#     "2024_12_16_005c-H1F_TIC.txt",
-#     "2024_12_16_005c-H1F_XIC_266.txt",
-#     "2024_12_16_005c-H1F_XIC_364.txt",
-#     "2024_12_16_005c-H1F_XIC_366.txt",
-# ]
-gcms_filename: list[str] = [
-    # "2024_12_16_005c-H3F_TIC.txt",
-    # "2024_12_16_005c-H3F_XIC_266.txt",
-    # "2024_12_16_005c-H3F_XIC_364.txt",
-    # "2024_12_16_005c-H3F_XIC_366.txt",
-    "2024_12_16_PS_Dimer_TIC.txt",
-    # "2024_12_16_PS_Dimer_XIC_266.txt",
-    # "2024_12_16_PS_Dimer_XIC_364.txt",
-    # "2024_12_16_PS_Dimer_XIC_366.txt",
+gcms_filename: str = [
+    "2024_12_16_005c-H1F_TIC.txt",
+    #     "2024_12_16_005c-H1F_XIC_266.txt",
+    #     "2024_12_16_005c-H1F_XIC_364.txt",
+    #     "2024_12_16_005c-H1F_XIC_366.txt",
 ]
+# gcms_filename: list[str] = [
+# "2024_12_16_005c-H3F_TIC.txt",
+# "2024_12_16_005c-H3F_XIC_266.txt",
+# "2024_12_16_005c-H3F_XIC_364.txt",
+# "2024_12_16_005c-H3F_XIC_366.txt",
+# "2024_12_16_PS_Dimer_TIC.txt",
+# "2024_12_16_PS_Dimer_XIC_266.txt",
+# "2024_12_16_PS_Dimer_XIC_364.txt",
+# "2024_12_16_PS_Dimer_XIC_366.txt",
+# ]
 # ms_filename: str = "2024_12_16_005c-H1F_t_3_8m.txt"
+# ms_filename: str = "2024_12_16_005c-H1F_t_4_0m.txt"
 # "2024_12_16_005c-H1F_t_4_0m.txt"  # "2024_12_16_005c-H1F_t_4_0m.txt" 2024_12_16_005c-H1F_t_3_8m.txt
-ms_filename: str = "2024_12_16_005c-H3F_t_4_0m.txt"
+# ms_filename: str = "2024_12_16_005c-H3F_t_3_1m.txt"
+# ms_filename: str = "2024_12_16_005c-H3F_t_3_3m.txt"
+# ms_filename: str = "2024_12_16_005c-H3F_t_3_4m.txt"
+ms_filename: str = "2024_12_16_005c-H3F_t_3_5m.txt"
+# ms_filename: str = "2024_12_16_005c-H3F_t_3_6m.txt"
+# ms_filename: str = "2024_12_16_005c-H3F_t_3_8m.txt"
+# ms_filename: str = "2024_12_16_005c-H3F_t_4_0m.txt"
 # ms_filename: str = "2024_12_16_PS_Dimer_t_3_8m.txt"
 # label = "Isopropylbenzene-SCF3"
 # labels = ["PS-Dimer-SCF$_3$", "XIC_266", "XIC_364", "XIC_366"]
 # labels = ["PS-Dimer-SO$_3$F", "XIC_266", "XIC_364", "XIC_366"]
-# labels = ["PS_Dimer"]
+labels = ["PS_Dimer-SCF$_3$"]
 # label = "PS_Dimer"  # PS_Dimer # 005c-H3F
-label = "PS-Dimer-SO$_3$F"
+label = "PS-Dimer-SCF{_3} (with functionalized impurity)"
 # label = "PS-Dimer-SCF$_3$"
-# time_label = 3.8
-time_label = 4.0
+time_label = 3.5
+# time_label = 4.0
 if __name__ == "__main__":
     # gcms_linear_cal_plot = GCMS_LinearCalibration_Plots(
     #     data_dir=data_dir,
@@ -71,16 +78,16 @@ if __name__ == "__main__":
     #     nm=230,
     # )
     # gcms_linear_cal_plot.plot_calibration_curve()
-    # gcms_plots = GCMSPlots(
-    #     data_dir=data_dir,
-    #     gcms_data_path=gcms_filename,
-    #     result_dir=result_path,
-    #     style_path=style_path,
-    #     gcms_type="TIC",
-    #     labels=labels,
-    #     colors=["#8286ff", "#00ff00", "#f5c92a", "#AF69EE", "#FFC0CB"],
-    # )
-    # gcms_plots.plot_gcms(xlim=(2.6, 7))
+    gcms_plots = GCMSPlots(
+        data_dir=data_dir,
+        gcms_data_path=gcms_filename,
+        result_dir=result_path,
+        style_path=style_path,
+        gcms_type="TIC",
+        labels=labels,
+        colors=["#8286ff", "#00ff00", "#f5c92a", "#AF69EE", "#FFC0CB"],
+    )
+    gcms_plots.plot_gcms(xlim=(2.6, 7))
     ms_plots = MSPlots(
         data_dir=data_dir,
         ms_data_path=ms_filename,

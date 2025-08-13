@@ -117,6 +117,11 @@ class GCMSPlots:
             self.result_dir / f"{self.result_name}{self.gcms_type}_gcms_plot.png",
             dpi=600,
         )
+        plt.savefig(
+            self.result_dir / f"{self.result_name}{self.gcms_type}_gcms_plot.eps",
+            format="eps",
+            dpi=600,
+        )
 
 
 class MSPlots:
@@ -255,6 +260,11 @@ class MSPlots:
             self.result_dir / f"{self.result_name}ms_spectrum_at_{time}min.png",
             dpi=600,
         )
+        plt.savefig(
+            self.result_dir / f"{self.result_name}ms_spectrum_at_{time}min.eps",
+            format="eps",
+            dpi=600,
+        )
 
     def plot_ms_zoom(
         self,
@@ -309,6 +319,12 @@ class MSPlots:
         plt.savefig(
             self.result_dir
             / f"{self.result_name}ms_spectrum_at_{time}min_{xlim[0]}_{xlim[1]}m_z_zoom.png",
+            dpi=600,
+        )
+        plt.savefig(
+            self.result_dir
+            / f"{self.result_name}ms_spectrum_at_{time}min_{xlim[0]}_{xlim[1]}m_z_zoom.eps",
+            format="eps",
             dpi=600,
         )
 
