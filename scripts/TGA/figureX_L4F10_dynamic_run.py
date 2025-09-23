@@ -68,7 +68,7 @@ labels: list = ["PS-110K", "PS-110K-SCF3"]
 # labels: list = ["PS-19.6K", "PS-19.6K-SCF3"]
 # labels: list = ["PS-40.4K", "PS-40.4K-SCF3"]
 # labels: list = ["PS-110K", "PS-110K-SCF3"]
-colors = ["#A0A0A0", "#ffcc02"]
+colors = ["#000000", "#ffcc02"]
 labels[1] = "PS-110K-SCF$_{3}$"
 
 if __name__ == "__main__":
@@ -104,7 +104,7 @@ if __name__ == "__main__":
         style_path=style_path,
     )
     dynamic_tga_plots.plot_tga_dynamic(
-        t_depolymerization_cutoff=99.5,
+        t_depolymerization_cutoff=98,
         target_mass=104,
         xlim=(300, 400),
         initial_correction_temp=300,

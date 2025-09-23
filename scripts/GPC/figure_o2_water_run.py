@@ -40,10 +40,10 @@ gpc_filenames: list[str] = [
 
 labels: list = [
     "PS-6.4K",
-    r"Water + O${_2}$",
-    r"Water + no O${_2}$",
-    r"no Water + O${_2}$",
-    r"no Water + no O${_2}$",
+    r"O${_2}$ + H${_2}$O",
+    r"no O${_2}$ + H${_2}$O",
+    r"O${_2}$ + no H${_2}$O",
+    r"no O${_2}$ + no H${_2}$O",
 ]
 
 gpc_metadata: list = []
@@ -54,18 +54,11 @@ if __name__ == "__main__":
         gpc_data_path=gpc_filenames,
         labels=labels,
         colors=[
-            "#8286ff",
-            "#2166ac",
-            "#a50026",
-            "#d73027",
-            "#f46d43",
-            "#fdae61",
-            "#fee08b",
-            "#d9ef8b",
-            "#a6d96a",
-            "#66bd63",
-            "#1a9850",
-            "#006837",
+            "#000000",
+            "#003380",
+            "#008033",
+            "#668000",
+            "#800000",
         ],
         result_dir=result_path,
         style_path=style_path,

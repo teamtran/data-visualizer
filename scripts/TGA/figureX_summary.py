@@ -44,9 +44,13 @@ if __name__ == "__main__":
         style_path=style_path,
     )
     tga_summary_plots.plot_onset_temperature_vs_mn("mn_summary.csv")
+    tga_summary_plots.plot_depoly_temperature_vs_mn("mn_summary.csv")
     tga_summary_plots.plot_mass_loss_vs_mn("mn_summary.csv")
 
     tga_summary_plots.plot_onset_temperature_vs_percent_functionalization(
+        "percent_func_summary.csv"
+    )
+    tga_summary_plots.plot_depoly_temperature_vs_percent_functionalization(
         "percent_func_summary.csv"
     )
     tga_summary_plots.plot_mass_loss_vs_percent_functionalization(

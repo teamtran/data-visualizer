@@ -104,7 +104,7 @@ if __name__ == "__main__":
         style_path=style_path,
     )
     dynamic_tga_plots.plot_tga_dynamic(
-        t_depolymerization_cutoff=99.5,
+        t_depolymerization_cutoff=98,
         target_mass=104,
         xlim=(250, 400),
         initial_correction_temp=250,

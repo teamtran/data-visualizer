@@ -68,7 +68,7 @@ dynamic_ms_filenames: list = [
 
 # labels: list = ["PS-SCF3-1K_min", "PS-6.1K-1K_min"]
 labels: list = ["PS-19.6K", "PS-19.6K-SCF$_{3}$"]
-colors: list = ["#A0A0A0", "#F4BD14"]
+colors: list = ["#000000", "#F4BD14"]
 
 if __name__ == "__main__":
     isothermal_tga_plots = TGAPlots(

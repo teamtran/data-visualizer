@@ -78,7 +78,7 @@ class GPCPlots:
         """
         Function that plots GPC data.
         """
-        fig, ax = plt.subplots(figsize=(4, 3.25))
+        fig, ax = plt.subplots(figsize=(7, 5))
         plt.tight_layout(pad=3)
         # aesthetics
         ax.set_xlabel("Retention Time (min)", fontsize=12)

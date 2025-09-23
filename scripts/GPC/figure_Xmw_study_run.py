@@ -86,8 +86,8 @@ gpc_metadata: list = [
     "Mn=0.9k, Mw=1.1k, \nMp=1.0k",  # PS-1.1K-SCF3
     "Mn=9.5k, Mw=10.2k, \nMp=10.8k",  # PS-10K-SCF3
     "Mn=17.2k, Mw=18.4k, \nMp=19.6k",  # PS-19.6K-SCF3
-    "Mn=33.8k, Mw=36.8k, \nMp=40.7k",  # PS-40.4K-SCF3
-    "Mn=84.9k, Mw=100k, \nMp=109k",  # PS-110K-SCF3
+    "Mn=35.6k, Mw=37.8k, \nMp=40.7k",  # PS-40.4K-SCF3
+    "Mn=95.5k, Mw=107k, \nMp=109k",  # PS-110K-SCF3
     "Mn=48.2k, Mw=140k, \nMp=92.2k",  # PS-Styrofoam-SCF3
     # "Mn=0.9k, Mw=1.1k, Mp=1.0k",  # PS-1.1K-SCF3
     # "Mn=8.5k, Mw=9.2k, Mp=9.8k",  # PS-10K-SCF3
@@ -97,18 +97,18 @@ gpc_metadata: list = [
 ]
 
 colors: list = [
-    "#d9d9d9",
-    "#bdbdbd",
-    "#969696",
-    "#636363",
-    "#252525",
-    "#8286ff",
-    "#a6bddb",
-    "#74a9cf",
-    "#3690c0",
-    "#0570b0",
-    "#045a8d",
-    "#f5c92a",
+    "#000000",
+    "#000000",
+    "#000000",
+    "#000000",
+    "#000000",
+    "#000000",
+    "#ffcc02",
+    "#ffcc02",
+    "#ffcc02",
+    "#ffcc02",
+    "#ffcc02",
+    "#ffcc02",
 ]
 
 xlims: list = [(7.7, 10.0), (6.7, 8.5), (6.4, 8.1), (5.9, 7.8), (5.0, 7.6), (3.5, 9.0)]

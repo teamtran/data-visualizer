@@ -77,7 +77,7 @@ labels: list = [
     "PS-1.12K-SCF$_{3}$-3.21%",
     "PS-1.12K-SCF$_{3}$-5.33%",
 ]
-colors: list = ["#A0A0A0", "#ffcc02", "#addd8e", "#41ab5d"]
+colors: list = ["#000000", "#ffcc02", "#addd8e", "#41ab5d"]
 # labels[1] = "PS-1.12K-SCF$_{3}$"
 
 if __name__ == "__main__":

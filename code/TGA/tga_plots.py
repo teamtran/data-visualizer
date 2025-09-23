@@ -1,4 +1,9 @@
 from typing import Optional
+import warnings
+import os
+
+warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
+os.environ["MKL_THREADING_LAYER"] = "GNU"
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib
@@ -64,7 +69,9 @@ class TGAPlots:
         # Truncate Temp./C column to Temp
         new_columns = tga_data.columns.tolist()
         new_columns[0] = "Temp"
-        new_columns[3] = "Mass loss/pct"
+        for column in new_columns:
+            if "Mass" in column:
+                new_columns[new_columns.index(column)] = "Mass loss/pct"
         tga_data.columns = new_columns
 
         # Process MS data with try-except
@@ -88,7 +95,6 @@ class TGAPlots:
             ms_data = ms_data.iloc[initial_correction_row_ms:]
 
         except Exception as e:
-            print(f"Warning: Could not process MS data - {e}")
             # Set ms_data to None or empty DataFrame if processing fails
             ms_data = pd.DataFrame()
 
@@ -145,7 +151,7 @@ class TGAPlots:
         """
         Plot several TGA isothermal data for comparison (can handle 1 or more).
         """
-        fig, ax = plt.subplots(1, figsize=(4, 3.25))
+        fig, ax = plt.subplots(1, figsize=(6, 4))
         plt.subplots_adjust(hspace=0.5)
         # aesthetics
         ax.set_xlabel("Time (min)", fontsize=10)
@@ -163,7 +169,7 @@ class TGAPlots:
             self.tga_data_path, self.ms_data_path, self.labels, self.colors
         ):
             tga_data = pd.read_csv(
-                self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="warn"
+                self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="skip"
             )
             initial_mass: float = float(tga_data.at[17, tga_data.columns[1]])
             num_skiprows: int = _find_empty_row(tga_data)
@@ -223,7 +229,7 @@ class TGAPlots:
     def plot_tga_dynamic(
         self,
         target_mass: int = 104,
-        t_depolymerization_cutoff: float = 99,
+        t_depolymerization_cutoff: float = 99.5,
         xlim: tuple = (100, 400),
         initial_correction_temp: int = 230,
     ):
@@ -242,11 +248,10 @@ class TGAPlots:
         for tga_path, ms_path, label, color in zip(
             self.tga_data_path, self.ms_data_path, self.labels, self.colors
         ):
-            print(tga_path)
             tga_data = pd.read_csv(
                 self.data_dir / tga_path,
                 encoding="iso-8859-1",
-                on_bad_lines="warn",
+                on_bad_lines="skip",
                 skiprows=37,
             )
             ms_data = pd.read_csv(
@@ -268,7 +273,6 @@ class TGAPlots:
                 ]
                 .values[0]
             )
-            print(f"{label}: {t_depolymerization_temp}")
             ax.plot(
                 tga_data["Temp"], tga_data["Mass loss/pct"], label=label, color=color
             )
@@ -313,9 +317,15 @@ class TGAPlots:
                 onset_mass_loss,
                 "x",
                 markersize=6,
-                label=label + f" (T{'$_{onset}$'} = {onset_temp:.1f}°C)",
+                label=label
+                + "\n"
+                + f"(T{'$_{onset}$'} = {onset_temp:.1f}°C), "
+                + f"(T{'$_{depoly}$'} = {t_depolymerization_temp:.1f}°C)",
                 color=color,
                 zorder=5,
+            )
+            print(
+                f"Name: {self.labels}, Onset Temperatures: {onset_temp}, Depolymerization Temperatures: {t_depolymerization_temp}"
             )
 
         # Draw a line in the y-axis at y=99%
@@ -324,15 +334,16 @@ class TGAPlots:
             color="r",
             linestyle="--",
             linewidth=0.3,
-            label="$T_\mathregular{depolymerization}$"
+            label="$T_\mathregular{depoly.}$"
             + f" at {t_depolymerization_cutoff}% Mass",
         )
 
-        ax.legend(fontsize=10)
+        ax.legend(fontsize=7)
         ax.set_xlim(xlim)
         ax.set_yticks([0, 20, 40, 60, 80, 100])  # Add this line
-        ax.set_ylim(0, 100)
+        ax.set_ylim(0, 105)
         plt.tight_layout()
+
         # ax.grid(True, linestyle="-", alpha=0.2, linewidth=0.5, color="gray")
         plt.savefig(
             self.result_dir / f"{self.result_name}tga_dynamic_{target_mass}m_z.png",
@@ -363,9 +374,7 @@ class TGAPlots:
         fig, ax = plt.subplots(1, figsize=(4, 3.25))
         # aesthetics
         ax.set_xlabel("m/z", fontsize=5)
-        ax.set_ylabel(
-            "Normalized Peak Area of Ion Current over Time (A x min)", fontsize=5
-        )
+        ax.set_ylabel("Normalized Peak Area of Ion Current over Time (A)", fontsize=5)
         # if tga_type == "isothermal":
         #     ax.set_title(
         #         f"Normalized Peak Area for m/z {m_z_start} to {m_z_end} for {tga_type} TGA-MS data at {isothermal_temp}°C",
@@ -555,7 +564,7 @@ class TGAPlots:
         ax.scatter(
             df_pristine_onset["mn"],
             df_pristine_onset["dynamic_onset_t"],
-            color="#A0A0A0",
+            color="#000000",
             marker="o",
             alpha=0.7,
             label="Pristine PS",
@@ -585,6 +594,87 @@ class TGAPlots:
         )
         plt.savefig(
             self.result_dir / f"onset_temperature_vs_mn.eps",
+            format="eps",
+            dpi=400,
+        )
+
+    def plot_depoly_temperature_vs_mn(
+        self, summary_dir, ylim=(250, 350), xlim=(-10, 100)
+    ):
+        """
+        Plot dynamic depolymerization temperature vs molecular weight for PS samples
+        with and without SCF3 functionalization.
+
+        Parameters:
+        summary_dir (str): Directory containing the mn_summary.csv file
+
+        Returns:
+        None: Displays the plot
+        """
+
+        # Read the CSV file
+        csv_path = self.data_dir / summary_dir
+        df = pd.read_csv(csv_path)
+
+        # Separate data into functionalized and non-functionalized samples
+        df_pristine = df[~df["name"].str.contains("SCF3", na=False)]
+        df_functionalized = df[df["name"].str.contains("SCF3", na=False)]
+
+        # Clean data for onset temperature (remove NaN values)
+        df_pristine_onset = df_pristine.dropna(
+            subset=["mn", "dynamic_depolymerization_t"]
+        )
+        df_func_onset = df_functionalized.dropna(
+            subset=["mn", "dynamic_depolymerization_t"]
+        )
+
+        # Create the plot with matching style
+        fig, ax = plt.subplots(1, figsize=(3.5, 3))
+        plt.subplots_adjust(hspace=0.5)
+
+        # Aesthetics matching plot_tga_isothermal
+        ax.set_xlabel("Molecular Weight (Mn) [kg/mol]", fontsize=10)
+        ax.set_ylabel("Dynamic Depolymerization Temperature [°C]", fontsize=10)
+        ax.set_ylim(ylim)
+        ax.set_xlim(xlim)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=8, direction="in")
+
+        # Plot onset temperature data
+        ax.scatter(
+            df_pristine_onset["mn"],
+            df_pristine_onset["dynamic_depolymerization_t"],
+            color="#000000",
+            marker="o",
+            alpha=0.7,
+            label="Pristine PS",
+            linewidth=1,
+        )
+
+        ax.scatter(
+            df_func_onset["mn"],
+            df_func_onset["dynamic_depolymerization_t"],
+            color="#F4BD14",
+            marker="o",
+            alpha=0.7,
+            label="PS-SCF3",
+            linewidth=1,
+        )
+
+        # Legend with matching fontsize
+        ax.legend(fontsize=10)
+
+        # Adjust layout
+        plt.tight_layout()
+
+        # Save the plot
+        plt.savefig(
+            self.result_dir / f"depolymerization_temperature_vs_mn.png",
+            dpi=400,
+        )
+        plt.savefig(
+            self.result_dir / f"depolymerization_temperature_vs_mn.eps",
             format="eps",
             dpi=400,
         )
@@ -634,7 +724,7 @@ class TGAPlots:
         ax.scatter(
             df_pristine_mass["mn"],
             df_pristine_mass["isothermal_mass_loss_after_1200mins"],
-            color="#A0A0A0",
+            color="#000000",
             marker="o",
             alpha=0.7,
             label="Pristine PS",
@@ -690,8 +780,6 @@ class TGAPlots:
         df_pristine = df[~df["name"].str.contains("SCF3", na=False)]
         df_functionalized = df[df["name"].str.contains("SCF3", na=False)]
 
-        print(df_functionalized)
-
         # Clean data for onset temperature (remove NaN values)
         df_pristine_onset = df_pristine.dropna(
             subset=["percent_functionalization", "dynamic_onset_t"]
@@ -699,8 +787,6 @@ class TGAPlots:
         df_func_onset = df_functionalized.dropna(
             subset=["percent_functionalization", "dynamic_onset_t"]
         )
-
-        print(df_func_onset)
 
         # Create the plot with matching style
         fig, ax = plt.subplots(1, figsize=(3.5, 3))
@@ -719,7 +805,7 @@ class TGAPlots:
         ax.scatter(
             df_pristine_onset["percent_functionalization"],
             df_pristine_onset["dynamic_onset_t"],
-            color="#A0A0A0",
+            color="#000000",
             marker="^",
             alpha=0.7,
             label="Pristine PS",
@@ -749,6 +835,87 @@ class TGAPlots:
         )
         plt.savefig(
             self.result_dir / f"onset_temperature_vs_percent_functionalization.eps",
+            format="eps",
+            dpi=400,
+        )
+
+    def plot_depoly_temperature_vs_percent_functionalization(
+        self, summary_dir, ylim=(250, 300), xlim=(-0.5, 6)
+    ):
+        """∂
+        Plot dynamic depolymerization temperature vs percent functionalization for PS samples
+        with and without SCF3 functionalization.
+
+        Parameters:
+        summary_dir (str): Directory containing the mn_summary.csv file
+
+        Returns:
+        None: Displays the plot
+        """
+
+        # Read the CSV file
+        csv_path = self.data_dir / summary_dir
+        df = pd.read_csv(csv_path)
+
+        # Separate data into functionalized and non-functionalized samples
+        df_pristine = df[~df["name"].str.contains("SCF3", na=False)]
+        df_functionalized = df[df["name"].str.contains("SCF3", na=False)]
+
+        # Clean data for onset temperature (remove NaN values)
+        df_pristine_onset = df_pristine.dropna(
+            subset=["percent_functionalization", "dynamic_depolymerization_t"]
+        )
+        df_func_onset = df_functionalized.dropna(
+            subset=["percent_functionalization", "dynamic_depolymerization_t"]
+        )
+
+        # Create the plot with matching style
+        fig, ax = plt.subplots(1, figsize=(3.5, 3))
+        plt.subplots_adjust(hspace=0.5)
+
+        # Aesthetics matching plot_tga_isothermal
+        ax.set_xlabel("Percent Functionalization [%]", fontsize=10)
+        ax.set_ylabel("Dynamic Depolymerization Temperature [°C]", fontsize=10)
+        ax.set_ylim(ylim)
+        ax.set_xlim(xlim)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=8, direction="in")
+
+        # Plot onset temperature data
+        ax.scatter(
+            df_pristine_onset["percent_functionalization"],
+            df_pristine_onset["dynamic_depolymerization_t"],
+            color="#000000",
+            marker="^",
+            alpha=0.7,
+            label="Pristine PS",
+            linewidth=1,
+        )
+
+        ax.scatter(
+            df_func_onset["percent_functionalization"],
+            df_func_onset["dynamic_depolymerization_t"],
+            color="#F4BD14",
+            marker="^",
+            alpha=0.7,
+            label="PS-SCF3",
+            linewidth=1,
+        )
+
+        # Legend with matching fontsize
+        ax.legend(fontsize=10)
+
+        # Adjust layout
+        plt.tight_layout()
+
+        # Save the plot
+        plt.savefig(
+            self.result_dir / f"depoly_temperature_vs_percent_functionalization.png",
+            dpi=400,
+        )
+        plt.savefig(
+            self.result_dir / f"depoly_temperature_vs_percent_functionalization.eps",
             format="eps",
             dpi=400,
         )
@@ -801,7 +968,7 @@ class TGAPlots:
         ax.scatter(
             df_pristine_mass["percent_functionalization"],
             df_pristine_mass["isothermal_mass_loss_after_1200mins"],
-            color="#A0A0A0",
+            color="#000000",
             marker="^",
             alpha=0.7,
             label="Pristine PS",
@@ -908,7 +1075,7 @@ class TGAPlots:
         scf3_colors.reverse()
 
         # Gray colors for virgin PS samples
-        virgin_colors = ["#808080", "#A0A0A0", "#606060", "#909090", "#707070"]
+        virgin_colors = ["#808080", "#000000", "#606060", "#909090", "#707070"]
 
         mass_difference_at_time = []
 
@@ -918,7 +1085,7 @@ class TGAPlots:
 
         #     # Read and process TGA data
         #     tga_data = pd.read_csv(
-        #         self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="warn"
+        #         self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="skip"
         #     )
         #     initial_mass: float = float(tga_data.at[17, tga_data.columns[1]])
         #     num_skiprows: int = _find_empty_row(tga_data)
@@ -954,7 +1121,7 @@ class TGAPlots:
 
             # Read and process TGA data
             tga_data = pd.read_csv(
-                self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="warn"
+                self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="skip"
             )
             initial_mass: float = float(tga_data.at[17, tga_data.columns[1]])
             num_skiprows: int = _find_empty_row(tga_data)
@@ -1074,7 +1241,7 @@ class TGAPlots:
         scf3_colors.reverse()
 
         # # Gray colors for virgin PS samples
-        # virgin_colors = ["#808080", "#A0A0A0", "#606060", "#909090", "#707070"]
+        # virgin_colors = ["#808080", "#000000", "#606060", "#909090", "#707070"]
 
         # # Plot virgin PS samples in gray
         # for i, (tga_path, label) in enumerate(virgin_ps_data_paths):
@@ -1084,7 +1251,7 @@ class TGAPlots:
         #     tga_data = pd.read_csv(
         #         self.data_dir / tga_path,
         #         encoding="iso-8859-1",
-        #         on_bad_lines="warn",
+        #         on_bad_lines="skip",
         #         skiprows=37,
         #     )
 
@@ -1111,7 +1278,7 @@ class TGAPlots:
             tga_data = pd.read_csv(
                 self.data_dir / tga_path,
                 encoding="iso-8859-1",
-                on_bad_lines="warn",
+                on_bad_lines="skip",
                 skiprows=37,
             )
 

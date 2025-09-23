@@ -68,7 +68,7 @@ dynamic_ms_filenames: list = [
 
 # labels: list = ["PS-SCF3-1K_min", "PS-6.1K-1K_min"]
 labels: list = ["PS-110K", "PS-110K-SCF3"]
-colors: list = ["#A0A0A0", "#ffcc02"]
+colors: list = ["#000000", "#ffcc02"]
 labels[1] = "PS-110K-SCF$_{3}$"
 
 if __name__ == "__main__":
