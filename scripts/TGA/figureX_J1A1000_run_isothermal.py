@@ -34,11 +34,11 @@ data_dir: Path = root_path / "data" / "TGA" / experiment_name
 # Filenames
 isothermal_filenames: list = [
     "ExpDat_2025_07_05_SL_PS_Tosoh_A1000_isothermal.csv",
-    "ExpDat_2025_03_08_SL_005F_J3_isothermal.csv",
+    "ExpDat_2025_03_19_SL_005F_J1_isothermal_run_2.csv",
 ]
 isothermal_ms_filenames: list = [
     "ExpDat_2025_07_05_SL_PS_Tosoh_A1000_isothermal-aeolos.csv",
-    "ExpDat_2025_03_08_SL_005F_J3_isothermal-aeolos.csv",
+    "ExpDat_2025_03_19_SL_005F_J1_isothermal_run_2-aeolos.csv",
 ]
 
 dynamic_filenames: list = [
