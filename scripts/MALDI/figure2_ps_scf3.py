@@ -34,11 +34,13 @@ data_dir: Path = root_path / "data" / "MALDI" / experiment_name
 
 # Filenames
 maldi_filenames: list[str] = [
-    "2025_01_23_005d-M1_dilute_700_3000_0_M5_1.txt",
+    # "2025_01_23_005d-M1_dilute_700_3000_0_M5_1.txt",
+    "2025_01_23_PS_Tosoh_A1000_dilute_700_3000_0_M4_1.txt",
 ]
 
 labels: list = [
-    "PS-SCF3"
+    "PS-1.12K"
+    # "PS-SCF3"
     # "005f-A2",
     # "005f-A3",
 ]
@@ -55,4 +57,4 @@ if __name__ == "__main__":
     )
     # maldi_plots.plot_maldi(xlim=(850, 1050))
     # Trial and error with prominence to get the peaks that you want detected
-    maldi_plots.plot_maldi_zoom(xlim=(850, 1050), ylim=(0, 1.0), prominence=1)
+    maldi_plots.plot_maldi_zoom(xlim=(880, 1010), ylim=(0, 1.0), prominence=10)

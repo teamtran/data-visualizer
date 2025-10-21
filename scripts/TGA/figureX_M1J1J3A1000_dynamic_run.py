@@ -70,8 +70,8 @@ dynamic_ms_filenames: list = [
 labels: list = [
     "PS-1.12K",
     # "PS-1.12K-SCF3-3.28%",
-    "PS-1.12K-SCF$_{3}$-3.21%",
-    "PS-1.12K-SCF$_{3}$-5.33%",
+    "PS-1.12K-SCF$_{3}$-1.70mol%",
+    "PS-1.12K-SCF$_{3}$-2.79mol%",
 ]
 # labels: list = ["PS-10K", "PS-10K-SCF3"]
 # labels: list = ["PS-19.6K", "PS-19.6K-SCF3"]

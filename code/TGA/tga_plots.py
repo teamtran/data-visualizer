@@ -759,7 +759,7 @@ class TGAPlots:
         )
 
     def plot_onset_temperature_vs_percent_functionalization(
-        self, summary_dir, ylim=(310, 360), xlim=(-0.5, 6)
+        self, summary_dir, ylim=(310, 360), xlim=(-0.5, 4)
     ):
         """∂
         Plot dynamic onset temperature vs percent functionalization for PS samples
@@ -840,7 +840,7 @@ class TGAPlots:
         )
 
     def plot_depoly_temperature_vs_percent_functionalization(
-        self, summary_dir, ylim=(250, 300), xlim=(-0.5, 6)
+        self, summary_dir, ylim=(250, 300), xlim=(-0.5, 4)
     ):
         """∂
         Plot dynamic depolymerization temperature vs percent functionalization for PS samples
@@ -921,7 +921,7 @@ class TGAPlots:
         )
 
     def plot_mass_loss_vs_percent_functionalization(
-        self, summary_dir, ylim=(40, 80), xlim=(-0.5, 6)
+        self, summary_dir, ylim=(40, 80), xlim=(-0.5, 4)
     ):
         """
         Plot isothermal mass loss vs percent functionalization for PS samples

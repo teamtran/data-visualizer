@@ -75,13 +75,13 @@ labels: list = [
     # "4hr_1eq Base",
     # "4hr_6eq Base",
     # "4hr_12eq Base",
-    "Entry 22 (control)",
-    "Entry 23",
-    "Entry 24",
-    "Entry 25",
-    "Entry 26",
-    "Entry 27",
-    "Entry 28",
+    "Entry 1 (control)",
+    "Entry 2",
+    "Entry 3",
+    "Entry 4",
+    "Entry 5",
+    "Entry 6",
+    "Entry 7",
 ]
 
 gpc_metadata: list = []

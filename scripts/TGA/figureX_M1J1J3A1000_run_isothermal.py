@@ -73,9 +73,8 @@ dynamic_ms_filenames: list = [
 # labels: list = ["PS-SCF3-1K_min", "PS-6.1K-1K_min"]
 labels: list = [
     "PS-1.12K",
-    # "PS-1.12K-SCF$_{3}$-3.28%",
-    "PS-1.12K-SCF$_{3}$-3.21%",
-    "PS-1.12K-SCF$_{3}$-5.33%",
+    "PS-1.12K-SCF$_{3}$-1.70mol%",
+    "PS-1.12K-SCF$_{3}$-2.79mol%",
 ]
 colors: list = ["#000000", "#ffcc02", "#addd8e", "#41ab5d"]
 # labels[1] = "PS-1.12K-SCF$_{3}$"
