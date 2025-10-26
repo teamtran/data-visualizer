@@ -571,6 +571,18 @@ class TGAPlots:
             linewidth=1,
         )
 
+        # Plot line of best fit for pristine samples
+        z = np.polyfit(df_pristine_onset["mn"], df_pristine_onset["dynamic_onset_t"], 1)
+        p = np.poly1d(z)
+        ax.plot(
+            df_pristine_onset["mn"],
+            p(df_pristine_onset["mn"]),
+            "--",
+            color="#000000",
+            alpha=0.7,
+            linewidth=1,
+        )
+
         ax.scatter(
             df_func_onset["mn"],
             df_func_onset["dynamic_onset_t"],
@@ -578,6 +590,17 @@ class TGAPlots:
             marker="o",
             alpha=0.7,
             label="PS-SCF3",
+            linewidth=1,
+        )
+        # Plot line of best fit for functionalized samples
+        z = np.polyfit(df_func_onset["mn"], df_func_onset["dynamic_onset_t"], 1)
+        p = np.poly1d(z)
+        ax.plot(
+            df_func_onset["mn"],
+            p(df_func_onset["mn"]),
+            "--",
+            color="#F4BD14",
+            alpha=0.7,
             linewidth=1,
         )
 
@@ -730,6 +753,21 @@ class TGAPlots:
             label="Pristine PS",
             linewidth=1,
         )
+        # Plot line of best fit
+        z = np.polyfit(
+            df_pristine_mass["mn"],
+            df_pristine_mass["isothermal_mass_loss_after_1200mins"],
+            1,
+        )
+        p = np.poly1d(z)
+        ax.plot(
+            df_pristine_mass["mn"],
+            p(df_pristine_mass["mn"]),
+            "--",
+            color="#000000",
+            alpha=0.7,
+            linewidth=1,
+        )
 
         ax.scatter(
             df_func_mass["mn"],
@@ -738,6 +776,19 @@ class TGAPlots:
             marker="o",
             alpha=0.7,
             label="PS-SCF3",
+            linewidth=1,
+        )
+        # Plot line of best fit
+        z = np.polyfit(
+            df_func_mass["mn"], df_func_mass["isothermal_mass_loss_after_1200mins"], 1
+        )
+        p = np.poly1d(z)
+        ax.plot(
+            df_func_mass["mn"],
+            p(df_func_mass["mn"]),
+            "--",
+            color="#F4BD14",
+            alpha=0.7,
             linewidth=1,
         )
 
