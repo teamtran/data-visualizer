@@ -77,18 +77,18 @@ labels: list = [
 gpc_metadata: list = [
     # "Mn=54.5k, Mw=121.3k, Mp=100k",  # PS-Styrofoam
     # "Mn=48.1k, Mw=140k, Mp=92.2k" # PS-Styrofoam-SCF3
-    "Mn=0.7k, Mw=0.9k, \nMp=1.0k, Mw/Mn=",  # PS-1.12K
-    "Mn=8.5k, Mw=9.2k, \nMp=9.8k",  # PS-10K
-    "Mn=16.7k, Mw=17.9k, \nMp=19.5k",  # PS-19.6K
-    "Mn=34.6k, Mw=37.4k, \nMp=41.4k",  # PS-40.4K
-    "Mn=94.0k, Mw=103k, \nMp=111k",  # PS-110K
-    "Mn=54.5k, Mw=121.3k, \nMp=100k",  # PS-Styrofoam
-    "Mn=0.9k, Mw=1.1k, \nMp=1.0k",  # PS-1.1K-SCF3
-    "Mn=9.5k, Mw=10.2k, \nMp=10.8k",  # PS-10K-SCF3
-    "Mn=17.2k, Mw=18.4k, \nMp=19.6k",  # PS-19.6K-SCF3
-    "Mn=35.6k, Mw=37.8k, \nMp=40.7k",  # PS-40.4K-SCF3
-    "Mn=95.5k, Mw=107k, \nMp=109k",  # PS-110K-SCF3
-    "Mn=48.2k, Mw=140k, \nMp=92.2k",  # PS-Styrofoam-SCF3
+    "Mn=0.7k, Mw=0.9k, \nMp=1.0k, D=1.29",  # PS-1.12K
+    "Mn=8.5k, Mw=9.2k, \nMp=9.8k, D=1.08",  # PS-10K
+    "Mn=16.7k, Mw=17.9k, \nMp=19.5k, D=1.07",  # PS-19.6K
+    "Mn=34.6k, Mw=37.4k, \nMp=41.4k, D=1.08",  # PS-40.4K
+    "Mn=94.0k, Mw=103k, \nMp=111k, D=1.10",  # PS-110K
+    "Mn=54.5k, Mw=121.3k, \nMp=100k, D=2.22",  # PS-Styrofoam
+    "Mn=0.9k, Mw=1.1k, \nMp=1.0k, D=1.22",  # PS-1.1K-SCF3
+    "Mn=9.5k, Mw=10.2k, \nMp=10.8k, D=1.07",  # PS-10K-SCF3
+    "Mn=17.2k, Mw=18.4k, \nMp=19.6k, D=1.07",  # PS-19.6K-SCF3
+    "Mn=35.6k, Mw=37.8k, \nMp=40.7k, D=1.06",  # PS-40.4K-SCF3
+    "Mn=95.5k, Mw=107k, \nMp=109k, D=1.12",  # PS-110K-SCF3
+    "Mn=48.2k, Mw=140k, \nMp=92.2k, D=2.91",  # PS-Styrofoam-SCF3
     # "Mn=0.9k, Mw=1.1k, Mp=1.0k",  # PS-1.1K-SCF3
     # "Mn=8.5k, Mw=9.2k, Mp=9.8k",  # PS-10K-SCF3
     # "Mn=16.6k, Mw=17.9k, Mp=19.4k",  # PS-19.6K-SCF3
