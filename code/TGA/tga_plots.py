@@ -10,6 +10,7 @@ import matplotlib
 import numpy as np
 import scipy.stats as stats
 from scipy.stats import linregress
+from scipy.optimize import curve_fit
 import pandas as pd
 import json
 import os
@@ -1363,3 +1364,180 @@ class TGAPlots:
             dpi=400,
             bbox_inches="tight",
         )
+
+    def plot_tga_isothermal_rate_constant(
+        self,
+        isothermal_temp: float,
+        target_mass: int = 104,
+        xlim: tuple = (0, 1450),
+        ylim: tuple = (0, 100),
+        initial_correction_time: int = 50,
+        fit_start_time: float = 0,
+        fit_end_time: float = None,
+    ):
+        """
+        Plot TGA isothermal data with 1st order reaction model fitting.
+
+        For a 1st order reaction, mass follows:
+        m(t) = m_∞ + (m_0 - m_∞) * exp(-k*t)
+
+        where:
+        - m(t) is the mass percentage at time t
+        - m_0 is the initial mass percentage
+        - m_∞ is the final/asymptotic mass percentage
+        - k is the rate constant (1/min)
+        - t is time (min)
+
+        Args:
+            isothermal_temp: Temperature for isothermal analysis
+            target_mass: Target mass for MS analysis
+            xlim: X-axis limits
+            ylim: Y-axis limits
+            initial_correction_time: Time correction for initial period
+            fit_start_time: Start time for fitting (relative to corrected time)
+            fit_end_time: End time for fitting (relative to corrected time)
+        """
+
+        def first_order_model(t, m_inf, m_0, k):
+            """First order reaction model for mass loss."""
+            return m_inf + (m_0 - m_inf) * np.exp(-k * t)
+
+        fig, ax = plt.subplots(1, figsize=(6, 4))
+        plt.subplots_adjust(hspace=0.5)
+
+        # Aesthetics
+        ax.set_xlabel("Time (min)", fontsize=10)
+        ax.set_ylabel("Mass (%)", fontsize=10)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="major", labelsize=8, direction="in")
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+        ax.set_yticks([0, 20, 40, 60, 80, 100])
+
+        rate_constants = []
+        r2_scores = []
+
+        for tga_path, ms_path, label, color in zip(
+            self.tga_data_path, self.ms_data_path, self.labels, self.colors
+        ):
+            # Read TGA data
+            tga_data = pd.read_csv(
+                self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="skip"
+            )
+            initial_mass: float = float(tga_data.at[17, tga_data.columns[1]])
+            num_skiprows: int = _find_empty_row(tga_data)
+            tga_data = pd.read_csv(
+                self.data_dir / tga_path,
+                encoding="iso-8859-1",
+                on_bad_lines="skip",
+                skiprows=num_skiprows,
+            )
+
+            # Preprocess data
+            tga_data, ms_data = self.preprocess(
+                tga_data, None, initial_correction_time, "Time"
+            )
+
+            # Adjust time to start from 0
+            time_data = tga_data["Time/min"].values - initial_correction_time
+            mass_data = tga_data["Mass loss/pct"].values
+
+            # Determine fitting range
+            if fit_end_time is None:
+                fit_end_time = time_data[-1]
+
+            # Filter data for fitting
+            fit_mask = (time_data >= fit_start_time) & (time_data <= fit_end_time)
+            time_fit = time_data[fit_mask]
+            mass_fit = mass_data[fit_mask]
+
+            # Initial parameter guesses
+            m_0_guess = mass_fit[0]
+            m_inf_guess = mass_fit[-1]
+            k_guess = 0.001  # Initial guess for rate constant
+
+            try:
+                # Fit the first order model
+                popt, pcov = curve_fit(
+                    first_order_model,
+                    time_fit,
+                    mass_fit,
+                    p0=[m_inf_guess, m_0_guess, k_guess],
+                    maxfev=10000,
+                    bounds=([0, 0, 0], [100, 100, 1])  # Reasonable bounds
+                )
+
+                m_inf_fit, m_0_fit, k_fit = popt
+
+                # Calculate R² score
+                mass_pred = first_order_model(time_fit, *popt)
+                r2 = r2_score(mass_fit, mass_pred)
+
+                rate_constants.append(k_fit)
+                r2_scores.append(r2)
+
+                # Plot experimental data
+                ax.plot(
+                    time_data,
+                    mass_data,
+                    label=f"{label}",
+                    color=color,
+                    linewidth=1,
+                    alpha=0.7,
+                )
+
+                # Plot fitted curve
+                time_smooth = np.linspace(time_fit[0], time_fit[-1], 500)
+                mass_smooth = first_order_model(time_smooth, *popt)
+                ax.plot(
+                    time_smooth,
+                    mass_smooth,
+                    label=f"{label} fit (k={k_fit:.2e} min$^{{-1}}$, R²={r2:.4f})",
+                    color=color,
+                    linewidth=1.5,
+                    linestyle="--",
+                )
+
+                print(f"\n{label}:")
+                print(f"  Rate constant (k): {k_fit:.6e} min^-1")
+                print(f"  Initial mass (m_0): {m_0_fit:.2f}%")
+                print(f"  Final mass (m_∞): {m_inf_fit:.2f}%")
+                print(f"  R² score: {r2:.6f}")
+
+            except Exception as e:
+                print(f"Warning: Fitting failed for {label}: {str(e)}")
+                # Still plot the raw data
+                ax.plot(
+                    time_data,
+                    mass_data,
+                    label=f"{label} (fit failed)",
+                    color=color,
+                    linewidth=1,
+                )
+
+        ax.axhline(
+            y=100,
+            color="r",
+            linestyle="--",
+            linewidth=0.5,
+            label="100% Mass",
+        )
+
+        ax.legend(fontsize=8, loc="best")
+        plt.tight_layout()
+
+        # Save plots
+        plt.savefig(
+            self.result_dir
+            / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z_rate_constant.png",
+            dpi=400,
+        )
+        plt.savefig(
+            self.result_dir
+            / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z_rate_constant.eps",
+            format="eps",
+            dpi=400,
+        )
+
+        return rate_constants, r2_scores
