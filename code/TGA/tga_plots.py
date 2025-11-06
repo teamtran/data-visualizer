@@ -1369,11 +1369,11 @@ class TGAPlots:
         self,
         isothermal_temp: float,
         target_mass: int = 104,
-        xlim: tuple = (0, 1450),
+        xlim: tuple = (0, 1200),
         ylim: tuple = (0, 100),
         initial_correction_time: int = 50,
         fit_start_time: float = 0,
-        fit_end_time: float = None,
+        fit_end_time: float = 1200,
     ):
         """
         Plot TGA isothermal data with 1st order reaction model fitting.
@@ -1465,7 +1465,7 @@ class TGAPlots:
                     mass_fit,
                     p0=[m_inf_guess, m_0_guess, k_guess],
                     maxfev=10000,
-                    bounds=([0, 0, 0], [100, 100, 1])  # Reasonable bounds
+                    bounds=([0, 0, 0], [100, 100, 1]),  # Reasonable bounds
                 )
 
                 m_inf_fit, m_0_fit, k_fit = popt

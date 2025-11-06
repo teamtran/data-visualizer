@@ -119,3 +119,6 @@ if __name__ == "__main__":
             uncertainty=False,
             time_for_mass_difference=1200,
         )
+        isothermal_tga_plots.plot_tga_isothermal_rate_constant(
+            isothermal_temp=300, initial_correction_time=50, fit_end_time=1200
+        )
