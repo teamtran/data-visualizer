@@ -1458,14 +1458,18 @@ class TGAPlots:
             k_guess = 0.001  # Initial guess for rate constant
 
             try:
-                # Fit the first order model
+                # Fit the first order model with tighter bounds for m_0
+                # m_0 should be close to 100% since data is corrected
                 popt, pcov = curve_fit(
                     first_order_model,
                     time_fit,
                     mass_fit,
                     p0=[m_inf_guess, m_0_guess, k_guess],
                     maxfev=10000,
-                    bounds=([0, 0, 0], [100, 100, 1]),  # Reasonable bounds
+                    bounds=(
+                        [0, 95, 0],  # Lower bounds: m_inf>=0, m_0>=95, k>=0
+                        [100, 100, 1],  # Upper bounds: m_inf<=100, m_0<=100, k<=1
+                    ),
                 )
 
                 m_inf_fit, m_0_fit, k_fit = popt
@@ -1499,11 +1503,19 @@ class TGAPlots:
                     linestyle="--",
                 )
 
+                # Calculate standard errors from covariance matrix
+                perr = np.sqrt(np.diag(pcov))
+
                 print(f"\n{label}:")
-                print(f"  Rate constant (k): {k_fit:.6e} min^-1")
-                print(f"  Initial mass (m_0): {m_0_fit:.2f}%")
-                print(f"  Final mass (m_∞): {m_inf_fit:.2f}%")
+                print(f"  Rate constant (k): {k_fit:.6e} ± {perr[2]:.6e} min^-1")
+                print(f"  Initial mass (m_0): {m_0_fit:.2f} ± {perr[1]:.2f}%")
+                print(f"  Final mass (m_∞): {m_inf_fit:.2f} ± {perr[0]:.2f}%")
+                print(f"  Total mass loss (m_0 - m_∞): {m_0_fit - m_inf_fit:.2f}%")
+                print(
+                    f"  Effective degradation rate: {k_fit * (m_0_fit - m_inf_fit):.6e}"
+                )
                 print(f"  R² score: {r2:.6f}")
+                print(f"  Half-life: {np.log(2)/k_fit:.2f} min")
 
             except Exception as e:
                 print(f"Warning: Fitting failed for {label}: {str(e)}")
