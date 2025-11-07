@@ -102,6 +102,9 @@ if __name__ == "__main__":
     isothermal_tga_plots.plot_tga_isothermal_rate_constant(
         isothermal_temp=300, fit_end_time=1200
     )
+    isothermal_tga_plots.plot_tga_isothermal_kinetic_analysis(
+        isothermal_temp=300, initial_correction_time=55, fit_end_time=1200
+    )
     # isothermal_tga_plots.plot_ms_peak_area(
     #     "isothermal", 300, initial_time=0, end_time=1500, m_z_start=60, m_z_end=150
     # )

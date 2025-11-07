@@ -1378,15 +1378,15 @@ class TGAPlots:
         """
         Plot TGA isothermal data with 1st order reaction model fitting.
 
-        For a 1st order reaction, mass follows:
-        m(t) = m_∞ + (m_0 - m_∞) * exp(-k*t)
+        For a 1st order reaction with complete degradation, mass follows:
+        m(t) = m_0 * exp(-k*t)
 
         where:
         - m(t) is the mass percentage at time t
         - m_0 is the initial mass percentage
-        - m_∞ is the final/asymptotic mass percentage
         - k is the rate constant (1/min)
         - t is time (min)
+        - m_∞ = 0 (asymptote at zero mass, complete degradation)
 
         Args:
             isothermal_temp: Temperature for isothermal analysis
@@ -1398,9 +1398,9 @@ class TGAPlots:
             fit_end_time: End time for fitting (relative to corrected time)
         """
 
-        def first_order_model(t, m_inf, m_0, k):
-            """First order reaction model for mass loss."""
-            return m_inf + (m_0 - m_inf) * np.exp(-k * t)
+        def first_order_model(t, m_0, k):
+            """First order reaction model assuming complete degradation (m_∞ = 0)."""
+            return m_0 * np.exp(-k * t)
 
         fig, ax = plt.subplots(1, figsize=(6, 4))
         plt.subplots_adjust(hspace=0.5)
@@ -1454,25 +1454,22 @@ class TGAPlots:
 
             # Initial parameter guesses
             m_0_guess = mass_fit[0]
-            m_inf_guess = mass_fit[-1]
             k_guess = 0.001  # Initial guess for rate constant
 
             try:
-                # Fit the first order model with tighter bounds for m_0
-                # m_0 should be close to 100% since data is corrected
+                # Fit with m_∞ = 0 (complete degradation model)
                 popt, pcov = curve_fit(
                     first_order_model,
                     time_fit,
                     mass_fit,
-                    p0=[m_inf_guess, m_0_guess, k_guess],
+                    p0=[m_0_guess, k_guess],
                     maxfev=10000,
                     bounds=(
-                        [0, 95, 0],  # Lower bounds: m_inf>=0, m_0>=95, k>=0
-                        [100, 100, 1],  # Upper bounds: m_inf<=100, m_0<=100, k<=1
+                        [95, 0],  # Lower bounds: m_0>=95, k>=0
+                        [100, 1],  # Upper bounds: m_0<=100, k<=1
                     ),
                 )
-
-                m_inf_fit, m_0_fit, k_fit = popt
+                m_0_fit, k_fit = popt
 
                 # Calculate R² score
                 mass_pred = first_order_model(time_fit, *popt)
@@ -1494,6 +1491,7 @@ class TGAPlots:
                 # Plot fitted curve
                 time_smooth = np.linspace(time_fit[0], time_fit[-1], 500)
                 mass_smooth = first_order_model(time_smooth, *popt)
+
                 ax.plot(
                     time_smooth,
                     mass_smooth,
@@ -1507,13 +1505,11 @@ class TGAPlots:
                 perr = np.sqrt(np.diag(pcov))
 
                 print(f"\n{label}:")
-                print(f"  Rate constant (k): {k_fit:.6e} ± {perr[2]:.6e} min^-1")
-                print(f"  Initial mass (m_0): {m_0_fit:.2f} ± {perr[1]:.2f}%")
-                print(f"  Final mass (m_∞): {m_inf_fit:.2f} ± {perr[0]:.2f}%")
-                print(f"  Total mass loss (m_0 - m_∞): {m_0_fit - m_inf_fit:.2f}%")
-                print(
-                    f"  Effective degradation rate: {k_fit * (m_0_fit - m_inf_fit):.6e}"
-                )
+                print(f"  Rate constant (k): {k_fit:.6e} ± {perr[1]:.6e} min^-1")
+                print(f"  Initial mass (m_0): {m_0_fit:.2f} ± {perr[0]:.2f}%")
+                print(f"  Final mass (m_∞): 0.00% (complete degradation)")
+                print(f"  Total mass loss (m_0 - m_∞): {m_0_fit:.2f}%")
+                print(f"  Effective degradation rate: {k_fit * m_0_fit:.6e}")
                 print(f"  R² score: {r2:.6f}")
                 print(f"  Half-life: {np.log(2)/k_fit:.2f} min")
 
@@ -1553,3 +1549,308 @@ class TGAPlots:
         )
 
         return rate_constants, r2_scores
+
+    def plot_tga_isothermal_kinetic_analysis(
+        self,
+        isothermal_temp: float,
+        target_mass: int = 104,
+        xlim: tuple = (0, 1200),
+        ylim: tuple = (0, 100),
+        initial_correction_time: int = 50,
+        fit_start_time: float = 0,
+        fit_end_time: float = 1200,
+    ):
+        """
+        Comprehensive kinetic analysis comparing 1st and 2nd order models.
+        Assumes complete degradation (m_∞ = 0).
+
+        Creates three plots:
+        1. Experimental data with both 1st and 2nd order fits
+        2. Linearized 1st order plot: ln(m) vs time
+        3. Linearized 2nd order plot: 1/m vs time
+
+        Args:
+            isothermal_temp: Temperature for isothermal analysis
+            target_mass: Target mass for MS analysis
+            xlim: X-axis limits for main plot
+            ylim: Y-axis limits for main plot
+            initial_correction_time: Time correction for initial period
+            fit_start_time: Start time for fitting (relative to corrected time)
+            fit_end_time: End time for fitting (relative to corrected time)
+        """
+
+        def first_order_model(t, m_0, k):
+            """First order reaction model: m(t) = m_0 * exp(-k*t)"""
+            return m_0 * np.exp(-k * t)
+
+        def second_order_model(t, m_0, k):
+            """Second order reaction model: m(t) = m_0 / (1 + k*m_0*t)"""
+            return m_0 / (1 + k * m_0 * t)
+
+        # Create figure with 3 subplots
+        fig = plt.figure(figsize=(15, 4))
+        ax1 = plt.subplot(1, 3, 1)  # Fitted curves
+        ax2 = plt.subplot(1, 3, 2)  # 1st order linearized
+        ax3 = plt.subplot(1, 3, 3)  # 2nd order linearized
+
+        # Aesthetics for all subplots
+        for ax in [ax1, ax2, ax3]:
+            ax.spines["top"].set_visible(False)
+            ax.spines["right"].set_visible(False)
+            ax.tick_params(axis="both", which="major", labelsize=8, direction="in")
+
+        # Main plot aesthetics
+        ax1.set_xlabel("Time (min)", fontsize=10)
+        ax1.set_ylabel("Mass (%)", fontsize=10)
+        ax1.set_xlim(xlim)
+        ax1.set_ylim(ylim)
+        ax1.set_yticks([0, 20, 40, 60, 80, 100])
+        ax1.set_title("Experimental Data with Fits", fontsize=10)
+
+        # Linearized plot aesthetics
+        ax2.set_xlabel("Time (min)", fontsize=10)
+        ax2.set_ylabel("ln(m)", fontsize=10)
+        ax2.set_title("1st Order: ln(m) vs t", fontsize=10)
+
+        ax3.set_xlabel("Time (min)", fontsize=10)
+        ax3.set_ylabel("1/m", fontsize=10)
+        ax3.set_title("2nd Order: 1/m vs t", fontsize=10)
+
+        results = []
+
+        for tga_path, ms_path, label, color in zip(
+            self.tga_data_path, self.ms_data_path, self.labels, self.colors
+        ):
+            # Read TGA data
+            tga_data = pd.read_csv(
+                self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="skip"
+            )
+            num_skiprows: int = _find_empty_row(tga_data)
+            tga_data = pd.read_csv(
+                self.data_dir / tga_path,
+                encoding="iso-8859-1",
+                on_bad_lines="skip",
+                skiprows=num_skiprows,
+            )
+
+            # Preprocess data
+            tga_data, _ = self.preprocess(
+                tga_data, None, initial_correction_time, "Time"
+            )
+
+            # Adjust time to start from 0
+            time_data = tga_data["Time/min"].values - initial_correction_time
+            mass_data = tga_data["Mass loss/pct"].values
+
+            # Filter data for fitting
+            if fit_end_time is None:
+                fit_end_time = time_data[-1]
+
+            fit_mask = (time_data >= fit_start_time) & (time_data <= fit_end_time)
+            time_fit = time_data[fit_mask]
+            mass_fit = mass_data[fit_mask]
+
+            # Initial parameter guesses
+            m_0_guess = mass_fit[0]
+            k_guess_first = 0.001
+            k_guess_second = 0.00001
+
+            # ============ FIRST ORDER FITTING ============
+            try:
+                popt_1st, pcov_1st = curve_fit(
+                    first_order_model,
+                    time_fit,
+                    mass_fit,
+                    p0=[m_0_guess, k_guess_first],
+                    maxfev=10000,
+                    bounds=([95, 0], [100, 1]),
+                )
+                m_0_1st, k_1st = popt_1st
+                mass_pred_1st = first_order_model(time_fit, *popt_1st)
+                r2_1st = r2_score(mass_fit, mass_pred_1st)
+                perr_1st = np.sqrt(np.diag(pcov_1st))
+
+                # Plot 1st order fit on main plot
+                time_smooth = np.linspace(time_fit[0], time_fit[-1], 500)
+                mass_smooth_1st = first_order_model(time_smooth, *popt_1st)
+                ax1.plot(
+                    time_smooth,
+                    mass_smooth_1st,
+                    label=f"{label} (1st order, R²={r2_1st:.4f})",
+                    color=color,
+                    linewidth=1.5,
+                    linestyle="--",
+                )
+
+                # Linearized 1st order plot: ln(m) vs t
+                valid_mask_1st = mass_fit > 0.01
+                if np.sum(valid_mask_1st) > 5:
+                    time_lin_1st = time_fit[valid_mask_1st]
+                    ln_term_1st = np.log(mass_fit[valid_mask_1st])
+
+                    # Linear fit to get k from slope
+                    slope_1st, intercept_1st = np.polyfit(time_lin_1st, ln_term_1st, 1)
+                    k_linear_1st = -slope_1st
+                    r2_linear_1st = r2_score(
+                        ln_term_1st, slope_1st * time_lin_1st + intercept_1st
+                    )
+
+                    ax2.scatter(
+                        time_lin_1st,
+                        ln_term_1st,
+                        color=color,
+                        s=20,
+                        alpha=0.6,
+                        label=f"{label}",
+                    )
+                    ax2.plot(
+                        time_lin_1st,
+                        slope_1st * time_lin_1st + intercept_1st,
+                        color=color,
+                        linewidth=2,
+                        linestyle="--",
+                        label=f"{label} fit (k={k_linear_1st:.2e}, R²={r2_linear_1st:.4f})",
+                    )
+
+            except Exception as e:
+                print(f"Warning: 1st order fitting failed for {label}: {str(e)}")
+                popt_1st = None
+                r2_1st = None
+                k_linear_1st = None
+                r2_linear_1st = None
+
+            # ============ SECOND ORDER FITTING ============
+            try:
+                popt_2nd, pcov_2nd = curve_fit(
+                    second_order_model,
+                    time_fit,
+                    mass_fit,
+                    p0=[m_0_guess, k_guess_second],
+                    maxfev=10000,
+                    bounds=([95, 0], [100, 0.1]),
+                )
+                m_0_2nd, k_2nd = popt_2nd
+                mass_pred_2nd = second_order_model(time_fit, *popt_2nd)
+                r2_2nd = r2_score(mass_fit, mass_pred_2nd)
+                perr_2nd = np.sqrt(np.diag(pcov_2nd))
+
+                # Plot 2nd order fit on main plot
+                mass_smooth_2nd = second_order_model(time_smooth, *popt_2nd)
+                ax1.plot(
+                    time_smooth,
+                    mass_smooth_2nd,
+                    label=f"{label} (2nd order, R²={r2_2nd:.4f})",
+                    color=color,
+                    linewidth=1.5,
+                    linestyle=":",
+                )
+
+                # Linearized 2nd order plot: 1/m vs t
+                valid_mask_2nd = mass_fit > 0.01
+                if np.sum(valid_mask_2nd) > 5:
+                    time_lin_2nd = time_fit[valid_mask_2nd]
+                    inv_term_2nd = 1.0 / mass_fit[valid_mask_2nd]
+
+                    # Linear fit to get k from slope
+                    slope_2nd, intercept_2nd = np.polyfit(time_lin_2nd, inv_term_2nd, 1)
+                    k_linear_2nd = slope_2nd / m_0_2nd
+                    r2_linear_2nd = r2_score(
+                        inv_term_2nd, slope_2nd * time_lin_2nd + intercept_2nd
+                    )
+
+                    ax3.scatter(
+                        time_lin_2nd,
+                        inv_term_2nd,
+                        color=color,
+                        s=20,
+                        alpha=0.6,
+                        label=f"{label}",
+                    )
+                    ax3.plot(
+                        time_lin_2nd,
+                        slope_2nd * time_lin_2nd + intercept_2nd,
+                        color=color,
+                        linewidth=2,
+                        linestyle="--",
+                        label=f"{label} fit (k={k_linear_2nd:.2e}, R²={r2_linear_2nd:.4f})",
+                    )
+
+            except Exception as e:
+                print(f"Warning: 2nd order fitting failed for {label}: {str(e)}")
+                popt_2nd = None
+                r2_2nd = None
+                k_linear_2nd = None
+                r2_linear_2nd = None
+
+            # Plot experimental data
+            ax1.plot(
+                time_data,
+                mass_data,
+                color=color,
+                linewidth=1,
+                alpha=0.7,
+                label=f"{label} (data)",
+            )
+
+            # Print results
+            print(f"\n{'='*60}")
+            print(f"{label}")
+            print(f"{'='*60}")
+
+            if popt_1st is not None:
+                print(f"\n1st Order Model (Non-linear fit):")
+                print(f"  Rate constant (k): {k_1st:.6e} ± {perr_1st[1]:.6e} min^-1")
+                print(f"  Initial mass (m_0): {m_0_1st:.2f} ± {perr_1st[0]:.2f}%")
+                print(f"  Final mass (m_∞): 0.00% (complete degradation)")
+                print(f"  R² (non-linear): {r2_1st:.6f}")
+                if k_linear_1st is not None:
+                    print(f"  k from linearized plot: {k_linear_1st:.6e} min^-1")
+                    print(f"  R² (linearized): {r2_linear_1st:.6f}")
+                print(f"  Half-life: {np.log(2)/k_1st:.2f} min")
+
+            if popt_2nd is not None:
+                print(f"\n2nd Order Model (Non-linear fit):")
+                print(f"  Rate constant (k): {k_2nd:.6e} ± {perr_2nd[1]:.6e} %^-1·min^-1")
+                print(f"  Initial mass (m_0): {m_0_2nd:.2f} ± {perr_2nd[0]:.2f}%")
+                print(f"  Final mass (m_∞): 0.00% (complete degradation)")
+                print(f"  R² (non-linear): {r2_2nd:.6f}")
+                if k_linear_2nd is not None:
+                    print(f"  k from linearized plot: {k_linear_2nd:.6e} %^-1·min^-1")
+                    print(f"  R² (linearized): {r2_linear_2nd:.6f}")
+
+            if popt_1st is not None and popt_2nd is not None:
+                print(f"\nModel Comparison:")
+                print(f"  Better fit: {'1st order' if r2_1st > r2_2nd else '2nd order'}")
+                print(f"  ΔR²: {abs(r2_1st - r2_2nd):.6f}")
+
+            # Store results
+            results.append({
+                "label": label,
+                "first_order": {"k": k_1st, "r2": r2_1st, "k_linear": k_linear_1st, "r2_linear": r2_linear_1st} if popt_1st is not None else None,
+                "second_order": {"k": k_2nd, "r2": r2_2nd, "k_linear": k_linear_2nd, "r2_linear": r2_linear_2nd} if popt_2nd is not None else None,
+            })
+
+        # Add reference line
+        ax1.axhline(y=100, color="r", linestyle="--", linewidth=0.5, label="100% Mass")
+
+        # Add legends
+        ax1.legend(fontsize=7, loc="best")
+        ax2.legend(fontsize=7, loc="best")
+        ax3.legend(fontsize=7, loc="best")
+
+        plt.tight_layout()
+
+        # Save plots
+        plt.savefig(
+            self.result_dir
+            / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z_kinetic_analysis.png",
+            dpi=400,
+        )
+        plt.savefig(
+            self.result_dir
+            / f"{self.result_name}tga_isothermal_{isothermal_temp}_{target_mass}m_z_kinetic_analysis.eps",
+            format="eps",
+            dpi=400,
+        )
+
+        return results
