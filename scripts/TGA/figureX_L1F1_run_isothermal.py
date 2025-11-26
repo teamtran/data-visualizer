@@ -82,21 +82,27 @@ if __name__ == "__main__":
         style_path=style_path,
     )
     # TODO: must change temp and xlimit depending on the isothermal conditions!
-    isothermal_tga_plots.plot_tga_isothermal(
-        isothermal_temp=300,
+    # isothermal_tga_plots.plot_tga_isothermal(
+    #     isothermal_temp=300,
+    #     xlim=(0, 1195),
+    #     ylim=(0, 100),
+    #     target_mass=104,
+    #     initial_correction_time=60,
+    #     uncertainty=False,
+    #     time_for_mass_difference=1200,
+    # )
+    results = isothermal_tga_plots.compare_isothermal_degradation_rates(
+        mass_loss_targets=[10, 20, 30, 40, 50, 60, 70, 80],  # % mass loss to compare
+        initial_correction_time=60,  # Starting time (min)
         xlim=(0, 1195),
         ylim=(0, 100),
-        target_mass=104,
-        initial_correction_time=60,
-        uncertainty=False,
-        time_for_mass_difference=1200,
     )
-    isothermal_tga_plots.plot_tga_isothermal_rate_constant(
-        isothermal_temp=300, initial_correction_time=60, fit_end_time=1200
-    )
-    isothermal_tga_plots.plot_tga_isothermal_kinetic_analysis(
-        isothermal_temp=300, initial_correction_time=60, fit_end_time=1200
-    )
+    # isothermal_tga_plots.plot_tga_isothermal_rat0e_constant(
+    #     isothermal_temp=300, initial_correction_time=60, fit_end_time=1200
+    # )
+    # isothermal_tga_plots.plot_tga_isothermal_kinetic_analysis(
+    #     isothermal_temp=300, initial_correction_time=60, fit_end_time=1200
+    # )
     # isothermal_tga_plots.plot_ms_peak_area(
     #     "isothermal", 300, initial_time=0, end_time=1500, m_z_start=60, m_z_end=150
     # )
