@@ -1978,6 +1978,7 @@ class TGAPlots:
         tolerance: float = 0.01,
         top_baseline_range: tuple = None,
         bottom_baseline_range: tuple = None,
+        heating_rate_colors: list[str] = None,
     ):
         """
         Plot Flynn-Ozawa-Wall analysis using ASTM E1641-23 standard.
@@ -1999,6 +2000,9 @@ class TGAPlots:
                               If None, uses first 10% of data.
             bottom_baseline_range: Tuple (start_temp, end_temp) for bottom baseline region.
                                  If None, uses last 10% of data.
+            heating_rate_colors: List of colors for heating rate data points (one per rate).
+                               If None, uses rocket colormap.
+                               Fitted lines always use rocket colormap.
 
         Returns:
             dict: Dictionary containing temperatures, heating rates, and Ea values
@@ -2101,7 +2105,7 @@ class TGAPlots:
 
         # Aesthetics
         ax1.set_xlabel("1000/T (K$^{-1}$)", fontsize=10)
-        ax1.set_ylabel("log(β) [log(°C/min)]", fontsize=10)
+        ax1.set_ylabel("log(β) [log(K/min)]", fontsize=10)
         ax1.spines["top"].set_visible(False)
         ax1.tick_params(axis="y", which="major", labelsize=8, direction="in")
         ax1.tick_params(axis="x", which="major", labelsize=8, direction="in")
@@ -2120,7 +2124,7 @@ class TGAPlots:
             "right",
             functions=(lambda y: 10**y, lambda y: np.log10(y)),
         )
-        ax1_right.set_ylabel("β (°C/min)", fontsize=10)
+        ax1_right.set_ylabel("β (K/min)", fontsize=10)
         ax1_right.tick_params(axis="y", which="major", labelsize=8, direction="in")
 
         # Set specific tick marks for common heating rates
@@ -2142,7 +2146,29 @@ class TGAPlots:
         results = {}
         ea_values = []
         conv_values = []
-        colors = plt.cm.viridis(np.linspace(0, 1, len(conversion_levels)))
+
+        # Create rocket colormap for fitted lines
+        # Try to import rocket from seaborn, fall back to inferno if not available
+        try:
+            import seaborn as sns
+            rocket_cmap = sns.color_palette("rocket", as_cmap=True)
+        except ImportError:
+            from matplotlib import cm
+            rocket_cmap = cm.get_cmap('inferno')
+
+        n_conversions = len(conversion_levels)
+        line_colors = [rocket_cmap(i / (n_conversions - 1)) for i in range(n_conversions)]
+
+        # Create or use provided heating rate colors for data points
+        if heating_rate_colors is None:
+            # Use rocket colormap for heating rate colors as well
+            n_rates = len(heating_rates)
+            heating_rate_colors = [rocket_cmap(i / (n_rates - 1)) for i in range(n_rates)]
+        elif len(heating_rate_colors) != len(heating_rates):
+            raise ValueError(
+                f"Number of heating_rate_colors ({len(heating_rate_colors)}) "
+                f"must match number of heating_rates ({len(heating_rates)})"
+            )
 
         print("\n" + "=" * 80)
         print("ASTM E1641-23 Flynn-Ozawa-Wall Analysis")
@@ -2244,17 +2270,17 @@ class TGAPlots:
             ea_values.append(Ea)
             conv_values.append(conversion)
 
-            # Plot
-            ax1.plot(
-                inv_T,
-                log_beta,
-                marker="o",
-                markersize=6,
-                linewidth=0,
-                label=f"{conversion:.0f}%",
-                color=colors[conv_idx],
-            )
+            # Plot data points - each point gets the color of its heating rate
+            for i in range(len(inv_T)):
+                ax1.plot(
+                    inv_T[i],
+                    log_beta[i],
+                    marker="o",
+                    markersize=6,
+                    color=heating_rate_colors[i],
+                )
 
+            # Plot fitted line with rocket colormap and label
             inv_T_fit = np.linspace(inv_T.min(), inv_T.max(), 100)
             log_beta_fit = slope * inv_T_fit + intercept
             ax1.plot(
@@ -2262,8 +2288,9 @@ class TGAPlots:
                 log_beta_fit,
                 linestyle="--",
                 linewidth=1.5,
-                color=colors[conv_idx],
+                color=line_colors[conv_idx],
                 alpha=0.7,
+                label=f"{conversion:.0f}% (Ea={Ea:.1f} kJ/mol, R²={r2:.3f})",
             )
 
             print(f"\nConversion: {conversion:.2f}%")
@@ -2292,10 +2319,10 @@ class TGAPlots:
             label=f"Avg = {avg_Ea:.1f} ± {std_Ea:.1f} kJ/mol",
         )
 
-        ax1.legend(fontsize=8, loc="best", title="Conversion")
-        ax1.grid(True, linestyle="--", alpha=0.3, linewidth=0.5)
+        ax1.legend(fontsize=8, loc="best")
+        # ax1.grid(True, linestyle="--", alpha=0.3, linewidth=0.5)
         ax2.legend(fontsize=9, loc="best")
-        ax2.grid(True, linestyle="--", alpha=0.3, linewidth=0.5)
+        # ax2.grid(True, linestyle="--", alpha=0.3, linewidth=0.5)
 
         # Save figures
         fig1.tight_layout()
@@ -2410,7 +2437,7 @@ class TGAPlots:
             )
 
         # Create comparison plot
-        fig, ax = plt.subplots(1, figsize=(6, 4.5))
+        fig, ax = plt.subplots(1, figsize=(4, 6))
         plt.subplots_adjust(hspace=0.5)
 
         # Aesthetics
@@ -2435,27 +2462,31 @@ class TGAPlots:
             avg_ea = ea.mean()
             std_ea = ea.std()
 
-            experiment_data.append({
-                'exp': exp,
-                'label': label,
-                'color': color,
-                'conv': conv,
-                'ea': ea,
-                'avg_ea': avg_ea,
-                'std_ea': std_ea,
-            })
+            experiment_data.append(
+                {
+                    "exp": exp,
+                    "label": label,
+                    "color": color,
+                    "conv": conv,
+                    "ea": ea,
+                    "avg_ea": avg_ea,
+                    "std_ea": std_ea,
+                }
+            )
 
         # Sort by average Ea to determine top and bottom curves
-        experiment_data_sorted = sorted(experiment_data, key=lambda x: x['avg_ea'], reverse=True)
+        experiment_data_sorted = sorted(
+            experiment_data, key=lambda x: x["avg_ea"], reverse=True
+        )
 
         # Plot each experiment with smart label positioning
         for idx, exp_info in enumerate(experiment_data_sorted):
-            conv = exp_info['conv']
-            ea = exp_info['ea']
-            label = exp_info['label']
-            color = exp_info['color']
-            avg_ea = exp_info['avg_ea']
-            std_ea = exp_info['std_ea']
+            conv = exp_info["conv"]
+            ea = exp_info["ea"]
+            label = exp_info["label"]
+            color = exp_info["color"]
+            avg_ea = exp_info["avg_ea"]
+            std_ea = exp_info["std_ea"]
 
             # Plot data points
             ax.plot(
@@ -2463,7 +2494,7 @@ class TGAPlots:
                 ea,
                 marker="o",
                 markersize=6,
-                linewidth=2,
+                linewidth=1.5,
                 color=color,
                 label=f"{label} (Avg={avg_ea:.1f}±{std_ea:.1f} kJ/mol)",
                 alpha=0.8,
@@ -2508,7 +2539,11 @@ class TGAPlots:
             print(f"  Number of points: {len(ea)}")
 
         ax.legend(fontsize=9, loc="best")
-        ax.grid(True, linestyle="--", alpha=0.3, linewidth=0.5)
+        # ax.grid(True, linestyle="--", alpha=0.3, linewidth=0.5)
+
+        # Set x-axis ticks to match actual conversion levels
+        unique_conversions = sorted(combined_data["conversion_%"].unique())
+        ax.set_xticks(unique_conversions)
 
         plt.tight_layout()
 
@@ -2561,9 +2596,7 @@ class TGAPlots:
 
         # Process all datasets
         all_data = []
-        for tga_path, label, color in zip(
-            self.tga_data_path, self.labels, self.colors
-        ):
+        for tga_path, label, color in zip(self.tga_data_path, self.labels, self.colors):
             # Read TGA data
             tga_data = pd.read_csv(
                 self.data_dir / tga_path, encoding="iso-8859-1", on_bad_lines="skip"
@@ -2601,10 +2634,7 @@ class TGAPlots:
 
         # For each mass loss target
         for target_mass in mass_loss_targets:
-            row_data = {
-                "mass_pct": 100 - target_mass,
-                "mass_loss_pct": target_mass
-            }
+            row_data = {"mass_pct": 100 - target_mass, "mass_loss_pct": target_mass}
             target_mass_value = 100 - target_mass
 
             # Find time for each sample to reach this mass loss
@@ -2614,23 +2644,25 @@ class TGAPlots:
                     idx = np.abs(sample["mass"] - target_mass_value).argmin()
                     sample_time = sample["time"][idx]
                     row_data[f"{sample['label']}_time_min"] = sample_time
-                    sample_times[sample['label']] = sample_time
+                    sample_times[sample["label"]] = sample_time
                 else:
                     row_data[f"{sample['label']}_time_min"] = np.nan
-                    sample_times[sample['label']] = np.nan
+                    sample_times[sample["label"]] = np.nan
 
             # Calculate rate improvement factors (pairwise comparisons)
             # For each pair of samples, calculate how much faster one is than the other
             for i, sample_i in enumerate(all_data):
                 for j, sample_j in enumerate(all_data):
                     if i < j:  # Only calculate once for each pair
-                        time_i = sample_times.get(sample_i['label'], np.nan)
-                        time_j = sample_times.get(sample_j['label'], np.nan)
+                        time_i = sample_times.get(sample_i["label"], np.nan)
+                        time_j = sample_times.get(sample_j["label"], np.nan)
 
                         if not np.isnan(time_i) and not np.isnan(time_j) and time_j > 0:
                             # Rate improvement factor: how much faster is sample_j compared to sample_i
                             rate_factor = time_i / time_j
-                            row_data[f"{sample_j['label']}_vs_{sample_i['label']}_rate_factor"] = rate_factor
+                            row_data[
+                                f"{sample_j['label']}_vs_{sample_i['label']}_rate_factor"
+                            ] = rate_factor
 
             results.append(row_data)
 
@@ -2666,12 +2698,14 @@ class TGAPlots:
         if len(all_data) == 2:
             print(f"\nRate Improvement Factors:")
             print("-" * 80)
-            sample_0_label = all_data[0]['label']
-            sample_1_label = all_data[1]['label']
+            sample_0_label = all_data[0]["label"]
+            sample_1_label = all_data[1]["label"]
             rate_col = f"{sample_1_label}_vs_{sample_0_label}_rate_factor"
 
             if rate_col in results_df.columns:
-                print(f"{'Mass %':<12} {'Loss %':<12} {sample_1_label} vs {sample_0_label}")
+                print(
+                    f"{'Mass %':<12} {'Loss %':<12} {sample_1_label} vs {sample_0_label}"
+                )
                 print("-" * 80)
                 for _, row in results_df.iterrows():
                     if not pd.isna(row[rate_col]):
@@ -2679,9 +2713,13 @@ class TGAPlots:
                         mass_loss_pct = row["mass_loss_pct"]
                         rate = row[rate_col]
                         if rate > 1:
-                            print(f"{mass_pct:<12.1f} {mass_loss_pct:<12.1f} {rate:.2f}× faster")
+                            print(
+                                f"{mass_pct:<12.1f} {mass_loss_pct:<12.1f} {rate:.2f}× faster"
+                            )
                         else:
-                            print(f"{mass_pct:<12.1f} {mass_loss_pct:<12.1f} {1/rate:.2f}× slower")
+                            print(
+                                f"{mass_pct:<12.1f} {mass_loss_pct:<12.1f} {1/rate:.2f}× slower"
+                            )
                 print("-" * 80)
 
         # Create visualization - single plot with TGA curves
@@ -2703,11 +2741,7 @@ class TGAPlots:
             # Add markers at each mass loss target (only within xlim range)
             for target_mass in mass_loss_targets:
                 target_mass_value = 100 - target_mass
-                if (
-                    sample["mass"].min()
-                    <= target_mass_value
-                    <= sample["mass"].max()
-                ):
+                if sample["mass"].min() <= target_mass_value <= sample["mass"].max():
                     idx = np.abs(sample["mass"] - target_mass_value).argmin()
                     marker_time = sample["time"][idx]
                     marker_mass = sample["mass"][idx]

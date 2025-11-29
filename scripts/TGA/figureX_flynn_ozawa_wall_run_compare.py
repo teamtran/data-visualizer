@@ -87,6 +87,6 @@ if __name__ == "__main__":
         ],
         labels=["PS-10K", "PS-10K-SCF3"],
         colors=["#000000", "#ffcc02"],
-        ylim=(300, 450),
-        xlim=(0, 20),
+        ylim=(300, 440),
+        xlim=(4, 16),
     )
