@@ -31,10 +31,10 @@ data_dir: Path = root_path / "data" / "LCMS" / experiment_name
 
 # For stacked plot - multiple files example
 lcms_filenames = [
-    "2025-07-30-AL-1-TIT.dx_DAD1B.CSV",
+    "2025-07-30-AL-1-TIT.dx_DAD1C_005.CSV",
     # Add more files here for stacking
-    "2025-07-30-AL-1-65A-bTEG-PPP.dx_DAD1B.CSV",
-    "2025-07-21-SL-AL-1-66B-run-Bperc-10--90--10.dx_DAD1B.CSV",
+    "2025-07-30-AL-1-65A-bTEG-PPP.dx_DAD1C_005.CSV",
+    "2025-07-21-SL-AL-1-66B-run-Bperc-10--90--10.dx_DAD1C_005.CSV",
     # "2025-07-30-AL-2-sample.dx_DAD1B.CSV",
     # "2025-07-30-AL-3-control.dx_DAD1B.CSV",
 ]
@@ -55,9 +55,9 @@ if __name__ == "__main__":
 
     # Use the new stacked plot function
     lcms_plot.plot_stacked_lcms(
-        xlim=(0, 15),  # Adjust as neededs
-        vertical_spacing=1.4,  # Adjust spacing between chromatograms
-        nm=380,
+        xlim=(0, 12),  # Adjust as neededs
+        vertical_spacing=1.6,  # Adjust spacing between chromatograms
+        nm=210,
         show_legend=True,
         normalize_individual=True,  # Each chromatogram normalized to [0,1]
     )

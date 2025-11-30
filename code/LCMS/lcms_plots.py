@@ -190,7 +190,7 @@ class LCMSPlots:
             Whether to normalize each chromatogram individually to [0,1]
         """
         fig, ax = plt.subplots(figsize=(10, 2 + len(self.lcms_data_path) * 1.5))
-        plt.tight_layout(pad=3)
+        plt.tight_layout(pad=2)
 
         # Aesthetics
         ax.set_xlabel("Retention Time (min)", fontsize=12)
@@ -241,27 +241,9 @@ class LCMSPlots:
                 linewidth=1.0,
             )
 
-            # Add a horizontal baseline for each chromatogram
-            if xlim:
-                baseline_x = xlim
-            else:
-                baseline_x = (
-                    lcms_data[lcms_data.columns[0]].min(),
-                    lcms_data[lcms_data.columns[0]].max(),
-                )
-
-            ax.plot(
-                baseline_x,
-                [y_offset, y_offset],
-                color="gray",
-                linewidth=0.5,
-                alpha=0.5,
-                linestyle="--",
-            )
-
-            # Add label on the left side of each chromatogram
+            # Add label on the left side of each chromatogram - moved further left
             ax.text(
-                -0.02,
+                -0.08,
                 y_offset + 0.5,
                 label,
                 transform=ax.get_yaxis_transform(),
@@ -277,7 +259,7 @@ class LCMSPlots:
             ax.set_xlim(xlim)
 
         # Set y-axis limits with some padding
-        y_min = -0.1
+        y_min = -0.2
         y_max = max(y_positions) + 1.2
         ax.set_ylim(y_min, y_max)
 
