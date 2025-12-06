@@ -32,35 +32,35 @@ if not result_path.exists():
 data_dir: Path = root_path / "data" / "TGA" / experiment_name
 
 dynamic_filenames: list = [
-    "ExpDat_2025_11_18_SL_PS_Tosoh_F1_1K_min.csv",
-    "ExpDat_2025_11_18_SL_PS_Tosoh_F1_2K_min.csv",
-    "ExpDat_2025_11_18_SL_PS_Tosoh_F1_5K_min.csv",
-    "ExpDat_2025_11_18_SL_PS_Tosoh_F1_10K_min.csv",
-    # "ExpDat_2025_11_18_SL_PS_005D-L1_1K_min.csv",
-    # "ExpDat_2025_11_18_SL_PS_005D-L1_2K_min.csv",
-    # "ExpDat_2025_11_18_SL_PS_005D-L1_5K_min.csv",
-    # "ExpDat_2025_11_18_SL_PS_005D-L1_10K_min.csv",
+    # "ExpDat_2025_11_18_SL_PS_Tosoh_F1_1K_min.csv",
+    # "ExpDat_2025_11_18_SL_PS_Tosoh_F1_2K_min.csv",
+    # "ExpDat_2025_11_18_SL_PS_Tosoh_F1_5K_min.csv",
+    # "ExpDat_2025_11_18_SL_PS_Tosoh_F1_10K_min.csv",
+    "ExpDat_2025_11_18_SL_PS_005D-L1_1K_min.csv",
+    "ExpDat_2025_11_18_SL_PS_005D-L1_2K_min.csv",
+    "ExpDat_2025_11_18_SL_PS_005D-L1_5K_min.csv",
+    "ExpDat_2025_11_18_SL_PS_005D-L1_10K_min.csv",
 ]
 dynamic_ms_filenames: list = [
-    "ExpDat_2025_11_18_SL_PS_Tosoh_F1_1K_min-aeolos.csv",
-    "ExpDat_2025_11_18_SL_PS_Tosoh_F1_2K_min-aeolos.csv",
-    "ExpDat_2025_11_18_SL_PS_Tosoh_F1_5K_min-aeolos.csv",
-    "ExpDat_2025_11_18_SL_PS_Tosoh_F1_10K_min-aeolos.csv",
-    # "ExpDat_2025_11_18_SL_PS_005D-L1_1K_min-aeolos.csv",
-    # "ExpDat_2025_11_18_SL_PS_005D-L1_2K_min-aeolos.csv",
-    # "ExpDat_2025_11_18_SL_PS_005D-L1_5K_min-aeolos.csv",
-    # "ExpDat_2025_11_18_SL_PS_005D-L1_10K_min-aeolos.csv",
+    # "ExpDat_2025_11_18_SL_PS_Tosoh_F1_1K_min-aeolos.csv",
+    # "ExpDat_2025_11_18_SL_PS_Tosoh_F1_2K_min-aeolos.csv",
+    # "ExpDat_2025_11_18_SL_PS_Tosoh_F1_5K_min-aeolos.csv",
+    # "ExpDat_2025_11_18_SL_PS_Tosoh_F1_10K_min-aeolos.csv",
+    "ExpDat_2025_11_18_SL_PS_005D-L1_1K_min-aeolos.csv",
+    "ExpDat_2025_11_18_SL_PS_005D-L1_2K_min-aeolos.csv",
+    "ExpDat_2025_11_18_SL_PS_005D-L1_5K_min-aeolos.csv",
+    "ExpDat_2025_11_18_SL_PS_005D-L1_10K_min-aeolos.csv",
 ]
 
 labels: list = [
-    "PS_F1_1K_min",
-    "PS_F1_2K_min",
-    "PS_F1_5K_min",
-    "PS_F1_10K_min",
-    # "PSSCF3_1K_min",
-    # "PSSCF3_2K_min",
-    # "PSSCF3_5K_min",
-    # "PSSCF3_10K_min",
+    # "PS_F1_1K_min",
+    # "PS_F1_2K_min",
+    # "PS_F1_5K_min",
+    # "PS_F1_10K_min",
+    "PSSCF3_1K_min",
+    "PSSCF3_2K_min",
+    "PSSCF3_5K_min",
+    "PSSCF3_10K_min",
 ]
 
 colors: list = [
@@ -85,5 +85,5 @@ if __name__ == "__main__":
         target_mass=104,
         xlim=(0, 500),
         ylim=(0, 130),
-        initial_correction_temp=108,
+        initial_correction_temp=0,
     )

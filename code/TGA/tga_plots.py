@@ -2151,19 +2151,25 @@ class TGAPlots:
         # Try to import rocket from seaborn, fall back to inferno if not available
         try:
             import seaborn as sns
+
             rocket_cmap = sns.color_palette("rocket", as_cmap=True)
         except ImportError:
             from matplotlib import cm
-            rocket_cmap = cm.get_cmap('inferno')
+
+            rocket_cmap = cm.get_cmap("inferno")
 
         n_conversions = len(conversion_levels)
-        line_colors = [rocket_cmap(i / (n_conversions - 1)) for i in range(n_conversions)]
+        line_colors = [
+            rocket_cmap(i / (n_conversions - 1)) for i in range(n_conversions)
+        ]
 
         # Create or use provided heating rate colors for data points
         if heating_rate_colors is None:
             # Use rocket colormap for heating rate colors as well
             n_rates = len(heating_rates)
-            heating_rate_colors = [rocket_cmap(i / (n_rates - 1)) for i in range(n_rates)]
+            heating_rate_colors = [
+                rocket_cmap(i / (n_rates - 1)) for i in range(n_rates)
+            ]
         elif len(heating_rate_colors) != len(heating_rates):
             raise ValueError(
                 f"Number of heating_rate_colors ({len(heating_rate_colors)}) "
@@ -2236,8 +2242,12 @@ class TGAPlots:
 
             # Iterative method using ASTM constants
             # Using Ozawa-Flynn-Wall equation: log(β) = const - 1.052*E/(RT)
-            slope_init, intercept_init, _, _, _ = linregress(inv_T, log_beta)
-            Ea = -slope_init * R / 0.457  # Initial guess in kJ/mol using OFW constant
+            # Perform linear regression once (data doesn't change)
+            slope, intercept, r_value, _, _ = linregress(inv_T, log_beta)
+            r2 = r_value**2
+
+            # Initial guess using standard Ozawa constant
+            Ea = -slope * R / 0.457  # Initial guess in kJ/mol using OFW constant
 
             for iteration in range(max_iterations):
                 Ea_old = Ea
@@ -2245,13 +2255,11 @@ class TGAPlots:
                 e_over_rt = (Ea * 1000) / (R * T_mean)
                 a, b = get_astm_constants(e_over_rt)
 
-                slope, intercept, r_value, _, _ = linregress(inv_T, log_beta)
+                # Recalculate Ea using updated b constant
                 Ea = -slope * R / b  # in kJ/mol
 
                 if abs(Ea - Ea_old) < tolerance:
                     break
-
-            r2 = r_value**2
 
             results[conversion] = {
                 "temperatures": temperatures,
@@ -2278,10 +2286,16 @@ class TGAPlots:
                     marker="o",
                     markersize=6,
                     color=heating_rate_colors[i],
+                    zorder=3,  # Ensure points are on top
                 )
 
-            # Plot fitted line with rocket colormap and label
-            inv_T_fit = np.linspace(inv_T.min(), inv_T.max(), 100)
+            # Plot fitted line extending slightly beyond data points
+            inv_T_range = inv_T.max() - inv_T.min()
+            inv_T_fit = np.linspace(
+                inv_T.min() - 0.02 * inv_T_range,
+                inv_T.max() + 0.02 * inv_T_range,
+                100,
+            )
             log_beta_fit = slope * inv_T_fit + intercept
             ax1.plot(
                 inv_T_fit,
@@ -2290,10 +2304,16 @@ class TGAPlots:
                 linewidth=1.5,
                 color=line_colors[conv_idx],
                 alpha=0.7,
+                zorder=2,  # Lines behind points
                 label=f"{conversion:.0f}% (Ea={Ea:.1f} kJ/mol, R²={r2:.3f})",
             )
 
             print(f"\nConversion: {conversion:.2f}%")
+            print(f"  Temperatures: {temperatures} °C")
+            print(f"  Heating rates: {beta_values} K/min")
+            print(f"  1000/T values: {inv_T}")
+            print(f"  log10(β) values: {log_beta}")
+            print(f"  Regression: slope={slope:.4f}, intercept={intercept:.4f}")
             print(f"  E/RT: {e_over_rt:.2f}, ASTM b={b:.4f}")
             print(f"  Ea (ASTM): {Ea:.2f} kJ/mol, R²={r2:.4f}")
 
