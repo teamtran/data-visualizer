@@ -78,9 +78,9 @@ if __name__ == "__main__":
     )
     dynamic_tga_plots.plot_flynn_ozawa_wall_astm(
         heating_rates=[1, 2, 5, 10],
-        conversion_levels=list(range(5, 80, 5)),
-        xlim=[108, 475],
-        initial_correction_temp=108,  # 290 for PS-10K, 270 for PS-10K-SCF3
+        conversion_levels=list(range(5, 21, 1)),
+        xlim=[220, 475],
+        initial_correction_temp=220,  # 290 for PS-10K, 270 for PS-10K-SCF3
         ea_ylim=[200, 600],
         heating_rate_colors=PS_SCF3_colors,  # All black for heating rate data points
         # Fitted lines will use rocket colormap automatically

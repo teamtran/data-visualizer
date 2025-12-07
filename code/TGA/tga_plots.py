@@ -265,6 +265,13 @@ class TGAPlots:
             tga_data, ms_data = self.preprocess(
                 tga_data, None, initial_correction_temp, "Temp"
             )
+
+            # Normalize mass loss data to have baseline at 0%
+            min_mass_loss = tga_data["Mass loss/pct"].min()
+            max_mass_loss = tga_data["Mass loss/pct"].max()
+            tga_data["Mass loss/pct"] = ((tga_data["Mass loss/pct"] - min_mass_loss) /
+                                          (max_mass_loss - min_mass_loss) * 100)
+
             # find the index at which the mass loss is closest to the t_depolymerization_cutoff
             t_depolymerization_temp = (
                 tga_data["Temp"]
@@ -1313,6 +1320,12 @@ class TGAPlots:
         #         tga_data, None, initial_correction_temp, "Temp"
         #     )
 
+        #     # Normalize mass loss data to have baseline at 0%
+        #     min_mass_loss = tga_data["Mass loss/pct"].min()
+        #     max_mass_loss = tga_data["Mass loss/pct"].max()
+        #     tga_data["Mass loss/pct"] = ((tga_data["Mass loss/pct"] - min_mass_loss) /
+        #                                   (max_mass_loss - min_mass_loss) * 100)
+
         #     # Plot TGA data
         #     ax.plot(
         #         tga_data["Temp"],
@@ -1339,6 +1352,12 @@ class TGAPlots:
             tga_data, ms_data = self.preprocess(
                 tga_data, None, initial_correction_temp, "Temp"
             )
+
+            # Normalize mass loss data to have baseline at 0%
+            min_mass_loss = tga_data["Mass loss/pct"].min()
+            max_mass_loss = tga_data["Mass loss/pct"].max()
+            tga_data["Mass loss/pct"] = ((tga_data["Mass loss/pct"] - min_mass_loss) /
+                                          (max_mass_loss - min_mass_loss) * 100)
 
             # Plot TGA data
             ax.plot(
@@ -2227,7 +2246,7 @@ class TGAPlots:
                 target_mass = self.conversion_to_mass(
                     conversion, top_baseline, bottom_baseline
                 )
-
+                print(f"{target_mass=}, {conversion=}, {label=}")
                 idx = (tga_data["Mass loss/pct"] - target_mass).abs().idxmin()
                 temp_at_conversion = tga_data.loc[idx, "Temp"]
 

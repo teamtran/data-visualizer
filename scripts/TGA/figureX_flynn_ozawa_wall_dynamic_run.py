@@ -83,7 +83,7 @@ if __name__ == "__main__":
     dynamic_tga_plots.plot_tga_dynamic(
         t_depolymerization_cutoff=98,
         target_mass=104,
-        xlim=(0, 500),
-        ylim=(0, 130),
-        initial_correction_temp=108,
+        xlim=(220, 500),
+        ylim=(-5, 105),
+        initial_correction_temp=220,
     )
