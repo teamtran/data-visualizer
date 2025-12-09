@@ -64,8 +64,13 @@ class TGAPlots:
         ms_data: pd.DataFrame,
         initial_correction: float,
         time_or_temp: str = "Time",
+        truncate_data: bool = True,
     ) -> pd.DataFrame:
-        """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to TGA-MS."""
+        """Function that applies transformation to the dataframe which will make it ready for plotting. Note, this is specific to TGA-MS.
+
+        Args:
+            truncate_data: If True, removes data before initial_correction point. If False, keeps all data (useful for dynamic plots).
+        """
         # Process TGA data
         # Truncate Temp./C column to Temp
         new_columns = tga_data.columns.tolist()
@@ -93,9 +98,10 @@ class TGAPlots:
                 ].index[0]
 
             # Remove the rows before the initial_correction_time_row for ms_data
-            ms_data = ms_data.iloc[initial_correction_row_ms:]
+            if truncate_data:
+                ms_data = ms_data.iloc[initial_correction_row_ms:]
 
-        except Exception as e:
+        except Exception:
             # Set ms_data to None or empty DataFrame if processing fails
             ms_data = pd.DataFrame()
 
@@ -123,7 +129,8 @@ class TGAPlots:
         tga_data["Mass loss/pct"] = tga_data["Mass loss/pct"] + correction_mass
 
         # Remove the rows before the initial_correction_time_row for tga_data
-        tga_data = tga_data.iloc[initial_correction_row:]
+        if truncate_data:
+            tga_data = tga_data.iloc[initial_correction_row:]
 
         return tga_data, ms_data
 
@@ -263,14 +270,8 @@ class TGAPlots:
                 skiprows=29,
             )
             tga_data, ms_data = self.preprocess(
-                tga_data, None, initial_correction_temp, "Temp"
+                tga_data, None, initial_correction_temp, "Temp", truncate_data=False
             )
-
-            # Normalize mass loss data to have baseline at 0%
-            min_mass_loss = tga_data["Mass loss/pct"].min()
-            max_mass_loss = tga_data["Mass loss/pct"].max()
-            tga_data["Mass loss/pct"] = ((tga_data["Mass loss/pct"] - min_mass_loss) /
-                                          (max_mass_loss - min_mass_loss) * 100)
 
             # find the index at which the mass loss is closest to the t_depolymerization_cutoff
             t_depolymerization_temp = (
@@ -1317,14 +1318,8 @@ class TGAPlots:
 
         #     # Preprocess data
         #     tga_data, ms_data = self.preprocess(
-        #         tga_data, None, initial_correction_temp, "Temp"
+        #         tga_data, None, initial_correction_temp, "Temp", truncate_data=False
         #     )
-
-        #     # Normalize mass loss data to have baseline at 0%
-        #     min_mass_loss = tga_data["Mass loss/pct"].min()
-        #     max_mass_loss = tga_data["Mass loss/pct"].max()
-        #     tga_data["Mass loss/pct"] = ((tga_data["Mass loss/pct"] - min_mass_loss) /
-        #                                   (max_mass_loss - min_mass_loss) * 100)
 
         #     # Plot TGA data
         #     ax.plot(
@@ -1350,14 +1345,8 @@ class TGAPlots:
 
             # Preprocess data
             tga_data, ms_data = self.preprocess(
-                tga_data, None, initial_correction_temp, "Temp"
+                tga_data, None, initial_correction_temp, "Temp", truncate_data=False
             )
-
-            # Normalize mass loss data to have baseline at 0%
-            min_mass_loss = tga_data["Mass loss/pct"].min()
-            max_mass_loss = tga_data["Mass loss/pct"].max()
-            tga_data["Mass loss/pct"] = ((tga_data["Mass loss/pct"] - min_mass_loss) /
-                                          (max_mass_loss - min_mass_loss) * 100)
 
             # Plot TGA data
             ax.plot(

@@ -77,7 +77,7 @@ if __name__ == "__main__":
     )
     dynamic_tga_plots.plot_flynn_ozawa_wall_astm(
         heating_rates=[1, 2, 5, 10],
-        conversion_levels=list(range(5, 21, 1)),
+        conversion_levels=list(range(10, 21, 1)),
         xlim=[280, 475],
         initial_correction_temp=270,  # 290 for PS-10K, 270 for PS-10K-SCF3
         ea_ylim=[200, 600],

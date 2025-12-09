@@ -64,10 +64,10 @@ labels: list = [
 ]
 
 colors: list = [
-    "#8286ff",
-    "#2166ac",
-    "#a50026",
-    "#66bd63",
+    "#000000",
+    "#2b388f",
+    "#1b75bb",
+    "#26a9e0",
 ]
 
 if __name__ == "__main__":
@@ -85,5 +85,5 @@ if __name__ == "__main__":
         target_mass=104,
         xlim=(220, 500),
         ylim=(-5, 105),
-        initial_correction_temp=220,
+        initial_correction_temp=270,
     )
